@@ -1,0 +1,13 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  state: MyString
+  present: false
+  data: MyText
+  description: MyString
+
+two:
+  state: MyString
+  present: false
+  data: MyText
+  description: MyString
