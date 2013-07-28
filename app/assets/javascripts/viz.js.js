@@ -194,8 +194,6 @@ add_bars = function(state_id) {
     return pie_colors[labels[i]];
   }).attr('id', function(d, i) {
     return labels[i] + "_bar";
-  }).on('mouseover', function(d) {
-    return d3.select('.tooltip').text(d).style('left', "50px").style('top', '50px');
   });
 };
 

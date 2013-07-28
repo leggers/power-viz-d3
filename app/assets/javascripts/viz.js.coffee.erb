@@ -184,12 +184,12 @@ add_bars = (state_id) ->
             .attr('id', (d, i) ->
                 labels[i] + "_bar"
             )
-            .on('mouseover', (d) ->
-                d3.select('.tooltip')
-                    .text(d)
-                    .style('left', "50px")
-                    .style('top', '50px')
-            )
+            # .on('mouseover', (d) ->
+                # d3.select('.tooltip')
+                    # .text(d)
+                    # .style('left', "50px")
+                    # .style('top', '50px')
+            # )
 
 #selects all of the rectangles in a group for a state then animates them to their new values
 update_bars = () ->
