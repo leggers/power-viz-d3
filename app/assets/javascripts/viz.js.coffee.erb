@@ -21,7 +21,7 @@ margins = {top: 20, right: 20, bottom: 20, left: 20}
 width = 959
 height = 593
 pie_colors = {coal: "#000", pet_liquid: '#567880', pet_coke: '#624949', nat_gas: '#dee4fa', other_gases: '#81a3d0', nuclear: '#19d2b2', hydro: '#003b6f', other_renew: '#567880', wind: '#dee4fa', solar: '#feb718', wood: '#624949', geo: '#383838', biomass: '#8cb990', hydro_pumped: '#743466', other: '#9a679f'}
-
+chart_group = undefined
 
 #######################################
 #
@@ -106,7 +106,9 @@ bring_to_top = (id_to_top) ->
     d3.select('#SP-').attr('fill', fill_color("MI"))
 
 show_map = () ->
-    d3.selectAll('#chart_group').selectAll('g').remove()
+    d3.selectAll('rect').remove()
+    d3.selectAll('.axis').remove()
+
 
 ###########################################
 #
@@ -132,15 +134,15 @@ setup_chart = () ->
     # d3.select('#veil')
         # .attr('opacity', .75)
 
-    d3.select('#chart_group').append('rect')
+    chart_group.append('rect')
         .attr('id', 'veil')
         .attr('width', '959')
         .attr('height', '593')
         .attr('fill', 'white')
         .attr('opacity', '0.75')
 
-    d3.select('#chart_group').append('div')
-        .attr('class', 'tooltip')
+    # d3.select('#chart_group').append('div')
+    #     .attr('class', 'tooltip')
 
     # d3.select("#chart_group").append('g')
         # .attr('class', 'x axis')
@@ -153,30 +155,40 @@ setup_chart = () ->
         # .attr('')
 
 add_state = (state_id) ->
-    d3.select('#chart_group')
-    .append('g')
+    console.log('add state')
+    chart_group.append('g')
     .attr('id', "#{state_id}_bars")
     .attr('transform', "translate: #{width/2}, #{height/2}")
 
+get_xScale = (numbers) ->
+    console.log('get_xScale')
+    d3.scale.linear().domain([0, d3.sum(numbers)]).range([0, width - margins['left'] - margins['right']])
+
 add_bars = (state_id) ->
-    data = get_chart_data(state_id, true)
+    console.log('add_bars')
+    data = get_chart_data(state_id, false)
     labels = data[0]
-    console.log(labels)
     numbers = data[1]
-    console.log(numbers)
+    xScale = get_xScale(numbers)
+    chart_group.append('g').call(
+        d3.svg.axis()
+        .scale(xScale)
+        .orient('bottom')
+    ).attr('class', 'axis')
+        .attr('transform', "translate(#{margins['left']}, 0)")
     d3.select("##{state_id}_bars").selectAll('rect')
         .data(numbers)
         .enter()
         .append('rect')
-            .attr('x', (d, i) ->
-                20 * i
-            )
             .attr('y', (d, i) ->
-                0
+                20 * i + 2 * margins['top']
             )
-            .attr('width', 18)
-            .attr('height', (d, i) ->
-                d or 0
+            .attr('x', (d, i) ->
+                margins['left']
+            )
+            .attr('height', 18)
+            .attr('width', (d, i) ->
+                xScale(d) or 0
             )
             .attr('fill', (d, i) ->
                 pie_colors[labels[i]]
@@ -193,7 +205,7 @@ add_bars = (state_id) ->
 
 #selects all of the rectangles in a group for a state then animates them to their new values
 update_bars = () ->
-    d3.select('#chart_group').selectAll('g').selectAll('rect')
+    chart_group.selectAll('g').selectAll('rect')
 
 # steps:
 # 1) bring veil to front
@@ -202,6 +214,7 @@ update_bars = () ->
 # 4) add rects to the above groups
 make_chart = (state_id) ->
     console.log(state_id)
+    console.log(chart_group)
     setup_chart()
     add_state(state_id)
     add_bars(state_id)
@@ -214,6 +227,7 @@ make_chart = (state_id) ->
 ###########################################
 
 $ ->
+    chart_group = d3.select("#chart_group")
 
     for abbrev in gon.state_abbrevs
         calculate_scores(abbrev)
@@ -230,6 +244,7 @@ $ ->
             value: weight,
             slide: (event, ui) ->
                 change_green_val(ui.handle.parentElement.id, ui.value)
+                show_map()
             })
         $("##{type}_box").on('change', (eventObject) ->
             change_green_val(this.id.slice(0, -4), this.value)
@@ -248,6 +263,7 @@ $ ->
             _index = _max - ui.value
             update_bars()
             d3.select("##{state}").attr('fill', fill_color(state)) for state in gon.state_abbrevs
+            show_map()
         })
 
     $('#year').text("Year: #{_max} (change with the slider below)")
