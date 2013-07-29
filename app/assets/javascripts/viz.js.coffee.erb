@@ -108,6 +108,7 @@ bring_to_top = (id_to_top) ->
 show_map = () ->
     d3.selectAll('rect').remove()
     d3.selectAll('.axis').remove()
+    d3.select('#close').remove()
 
 
 ###########################################
@@ -130,10 +131,6 @@ get_chart_data = (state_id, absolute) ->
     return [labels, numbers]
 
 setup_chart = () ->
-    # bring_to_top('veil')
-    # d3.select('#veil')
-        # .attr('opacity', .75)
-
     chart_group.append('rect')
         .attr('id', 'veil')
         .attr('width', '959')
@@ -141,18 +138,14 @@ setup_chart = () ->
         .attr('fill', 'white')
         .attr('opacity', '0.75')
 
-    # d3.select('#chart_group').append('div')
-    #     .attr('class', 'tooltip')
-
-    # d3.select("#chart_group").append('g')
-        # .attr('class', 'x axis')
-        # .attr("transform", "translate: 0, #{height - margin.bottom}")
-        # .call(xAxis)
-
-    # .append('text')
-    #     .attr("transform", "translate: #{width - margins.left}, 0")
-    #     .data('Close')
-        # .attr('')
+    d3.select('#top_paragraph')
+        .append('div')
+        .attr('id', 'close')
+        .text("Click here to close graph")
+        .style('font-size', '50px')
+        .on('click', () ->
+            show_map()
+        )
 
 add_state = (state_id) ->
     console.log('add state')

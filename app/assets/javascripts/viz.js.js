@@ -144,7 +144,8 @@ bring_to_top = function(id_to_top) {
 
 show_map = function() {
   d3.selectAll('rect').remove();
-  return d3.selectAll('.axis').remove();
+  d3.selectAll('.axis').remove();
+  return d3.select('#close').remove();
 };
 
 get_chart_data = function(state_id, absolute) {
@@ -171,7 +172,10 @@ get_chart_data = function(state_id, absolute) {
 };
 
 setup_chart = function() {
-  return chart_group.append('rect').attr('id', 'veil').attr('width', '959').attr('height', '593').attr('fill', 'white').attr('opacity', '0.75');
+  chart_group.append('rect').attr('id', 'veil').attr('width', '959').attr('height', '593').attr('fill', 'white').attr('opacity', '0.75');
+  return d3.select('#top_paragraph').append('div').attr('id', 'close').text("Click here to close graph").style('font-size', '50px').on('click', function() {
+    return show_map();
+  });
 };
 
 add_state = function(state_id) {

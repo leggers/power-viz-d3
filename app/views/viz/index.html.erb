@@ -1,9 +1,11 @@
 <center><h1>How is Electricity Produced in the US?</h1>
 
 	<body>
-		Below is a map representing the "green-ness" of the electricity generated in each state of the US (except Alaska and Hawaii, coming soon!). The data were pulled from the beta API of the <%= link_to "Energy Information Agency", "http://www.eia.gov" %>. Packages used to make this were d3.js, jQuery and jQuery-ui.
+		<div id="top_paragraph">
+			Below is a map representing the "green-ness" of the electricity generated in each state of the US (except Alaska and Hawaii, coming soon!). The data were pulled from the beta API of the <%= link_to "Energy Information Agency", "http://www.eia.gov" %>. Packages used to make this were d3.js, jQuery and jQuery-ui.
 
-		TALK LATER about hydro_pumped energy. It's a compensatory measure states take to prevent using non-green power sources during peak hours HOWEVER it's often a net negative for states! Crazy.
+			TALK LATER about hydro_pumped energy. It's a compensatory measure states take to prevent using non-green power sources during peak hours HOWEVER it's often a net negative for states! Crazy.
+		</div>
 
 		<div id='map'>
 			<%= render "map" %>
