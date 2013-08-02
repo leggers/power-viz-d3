@@ -17,12 +17,19 @@
 		<div id="weights">
 			<h1>Opinionated?</h1>
 			<h3>Set your own "green-ness" scores for various types of power.</h3>
-		  	<% for type, score in @green %>
-					<h4><%= @translations[type] %>:
-						<input type="number" style="width: 200px;" value=<%= score %> id=<%= "#{type}_box" %>></input>
-						<div style="width: 200px;" id=<%= "#{type}" %>></div>
-					</h4>
-		  	<% end %>
+			<div>
+			  	<% for type, score in @green %>
+			  		<% if type == :other_renew %>
+			  			</div>
+			  			<div>
+			  		<% end %>
+				  		<div class="val_chooser" style="background-color: <%=  %>">
+							<%= @translations[type] %>:
+							<div style="height:150px" id=<%= "#{type}" %>></div>
+							<input type="number" style="width: 50px;" value="<%= score %>" id=<%= "#{type}_box" %>></input>
+						</div>
+			  	<% end %>
+		  	</div>
 		</div>
 
 	</body>

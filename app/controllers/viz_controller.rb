@@ -23,8 +23,17 @@ class VizController < ApplicationController
 
     gon.elec_data = state_data
 
-    @translations = {coal: "Coal", pet_liquid: "Petroleum Liquid", pet_coke: "Petroleum Coke", nat_gas: "Natural Gas", other_gases: "Other Gasses", nuclear: "Nuclear",
-      hydro: "Hydroelectric", other_renew: "Other Renewable", wind: "Wind", solar: "Solar", wood: "Wood", geo: "Geothermal", biomass: "Biomass",
-      hydro_pumped: "Pumped Hydroelectric", other: "Other"}
+    @translations = {coal: "Coal", pet_liquid: "Petroleum\nLiquid", pet_coke: "Petroleum\nCoke",
+      nat_gas: "Natural Gas", other_gases: "Other Gasses", nuclear: "Nuclear",
+      hydro: "Hydroelectric", other_renew: "Other Renewable", wind: "Wind",
+      solar: "Solar", wood: "Wood", geo: "Geothermal", biomass: "Biomass",
+      hydro_pumped: "Pumped\nHydroelectric", other: "Other"}
+
+    @pie_colors = {coal: "#323232", pet_liquid: '#33401c', pet_coke: '#362012', nat_gas: '#002342',
+      other_gases: '#69c3e4', nuclear: '#01e512', hydro: '#2a30fb', other_renew: '#227a47',
+      wind: '#0de6f0', solar: '#dee118', wood: '#947603', geo: '#e7c130', biomass: '#3d8b54',
+      hydro_pumped: '#1c35b4', other: '#d91bdb'}
+
+    gon.pie_colors = @pie_colors
   end
 end
