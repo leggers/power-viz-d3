@@ -31,26 +31,43 @@ def request_url suffix
     url
 end
 
+def fill_out_series series
+    stop = false
+    p series
+    start_year = series["start"].to_i
+    data = series["data"]
+    if start_year > @min_year
+        # stop = true
+        for i in 1..start_year-@min_year
+            data << ["#{start_year-i}", "0"]
+        end
+    end
+    end_year = series["end"].to_i
+    if end_year > @max_year
+        @max_year = end_year
+    end
+    if end_year < @max_year
+        for i in end_year+1..@max_year
+            data.unshift ["#{i}", "0"]
+        end
+    end
+    unless data.length == @max_year - @min_year + 1
+        for point in data
+            data_year = point[0].to_i
+            should_be = @max_year - data.index(point)
+            unless data_year == should_be
+                data.insert(data.index(point), ["#{should_be}", "0"])
+            end
+        end
+    end
+    series
+end
+
 def add_to_db state, type, url
     toAdd = JSON.parse(RestClient.get(url))
     if toAdd["series"]
-        series = toAdd["series"][0]
-        start_year = series["start"].to_i
+        series = fill_out_series toAdd["series"][0]
         data = series["data"]
-        if start_year > @min_year
-            for i in 1..start_year-@min_year
-                data << ["#{start_year-i}", "0"]
-            end
-        end
-        end_year = series["end"].to_i
-        if end_year > @max_year
-            @max_year = end_year
-        end
-        if end_year < @max_year
-            for i in end_year+1..@max_year
-                data.unshift ["#{i}", "0"]
-            end
-        end
         stringified_data = data.to_s
         table_data = stringified_data.gsub "nil", "0"
         GenData.create!(

@@ -117,7 +117,8 @@ $(function() {
     }
   });
   $('#scale_absolute').on('click', update_bars);
-  return $('#scale_relative').on('click', update_bars);
+  $('#scale_relative').on('click', update_bars);
+  return $('#controls').hide();
 });
 
 calculate_scores = function(state) {
@@ -227,7 +228,7 @@ show_map = function(comparing) {
   d3.select('#close').remove();
   $('#controls').hide();
   d3.select('#compare').remove();
-  d3.select('#controls_toggle');
+  d3.select('#controls_toggle').remove();
   d3.selectAll('.legend_label').remove();
   d3.selectAll('.bar_label').remove();
   if (!comparing) {
@@ -353,7 +354,8 @@ setup_chart = function() {
   chart_group.append('text').attr('id', 'compare').attr('x', 10).attr('y', 580).text('Compare').attr('font-size', 25).on('click', function() {
     return show_map(true);
   });
-  return chart_group.append('text').attr('id', 'controls_toggle').attr('x', 410).attr('y', 580).text('Controls').on('click', toggle_controls);
+  chart_group.append('text').attr('id', 'controls_toggle').attr('x', 410).attr('y', 580).text('Controls').on('click', toggle_controls);
+  return $('#controls').slideDown();
 };
 
 add_legend = function() {
@@ -490,11 +492,15 @@ get_chart_data = function(state_id, absolute) {
     for (type in _ref) {
       series = _ref[type];
       labels[labels.length] = type;
-      to_append = series[_index1][1];
-      if (!to_append) {
-        to_append = 0;
+      if (typeof series === typeof "") {
+        numbers[numbers.length] = 0;
+      } else {
+        to_append = series[_index1][1];
+        if (!to_append) {
+          to_append = 0;
+        }
+        numbers[numbers.length] = to_append;
       }
-      numbers[numbers.length] = to_append;
     }
   } else {
     _ref1 = _percentages[state_id];

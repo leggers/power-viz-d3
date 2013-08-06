@@ -5,7 +5,7 @@
 
 #######################################
 #
-# Global variables (malpractice?)
+# Global variables (malpractice? ...yes (to be made into modules, one for map, one for chart))
 #
 #######################################
 
@@ -26,6 +26,7 @@ chart_group = undefined
 tooltip = undefined
 translations = undefined
 to_compare = []
+
 
 ###########################################
 #
@@ -113,6 +114,7 @@ $ ->
 
     $('#scale_absolute').on('click', update_bars)
     $('#scale_relative').on('click', update_bars)
+    $('#controls').hide()
 
     # to_compare = ['WA', 'FL', 'TX']
     # make_chart()
@@ -212,7 +214,7 @@ show_map = (comparing) ->
     d3.select('#close').remove()
     $('#controls').hide()
     d3.select('#compare').remove()
-    d3.select('#controls_toggle')
+    d3.select('#controls_toggle').remove()
     d3.selectAll('.legend_label').remove()
     d3.selectAll('.bar_label').remove()
     to_compare.length = 0 if not comparing
@@ -357,6 +359,8 @@ setup_chart = () ->
         .attr('y', 580)
         .text('Controls')
         .on('click', toggle_controls)
+
+    $('#controls').slideDown()
 
 add_legend = () ->
     index = 0
@@ -505,9 +509,14 @@ get_chart_data = (state_id, absolute) ->
     if absolute
         for type, series of gon.elec_data[state_id]
             labels[labels.length] = type
-            to_append = series[_index1][1]
-            to_append = 0 unless to_append # gets rid of undefined's
-            numbers[numbers.length] = to_append
+            if typeof series == typeof ""
+                numbers[numbers.length] = 0
+            else
+                # console.log(type)
+                # console.log(series)
+                to_append = series[_index1][1]
+                to_append = 0 unless to_append # gets rid of undefined's
+                numbers[numbers.length] = to_append
     else
         for type, series of _percentages[state_id]
             labels[labels.length] = type
