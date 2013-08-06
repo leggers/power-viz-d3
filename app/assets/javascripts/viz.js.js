@@ -117,9 +117,7 @@ $(function() {
     }
   });
   $('#scale_absolute').on('click', update_bars);
-  $('#scale_relative').on('click', update_bars);
-  to_compare = ['WA', 'FL', 'TX'];
-  return make_chart();
+  return $('#scale_relative').on('click', update_bars);
 });
 
 calculate_scores = function(state) {
