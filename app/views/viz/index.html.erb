@@ -1,14 +1,29 @@
-<center><h1>How is Electricity Produced in the US?</h1>
+<center>
+	<h1>What charges our cell phones, laptops and electric vehicles?</h1>
+</center>
 
-	<body>
+<body>
+	<center>
 		<div id="top_paragraph">
 			Below is a map representing the "green-ness" of the electricity generated in each state of the US (except Alaska and Hawaii, coming soon!). The data were pulled from the beta API of the <%= link_to "Energy Information Agency", "http://www.eia.gov" %>. Packages used to make this were d3.js, jQuery and jQuery-ui.
 
 			TALK LATER about hydro_pumped energy. It's a compensatory measure states take to prevent using non-green power sources during peak hours HOWEVER it's often a net negative for states! Crazy.
+
+			stuff to ackowledge: http://www.theatlantic.com/special-report/users-guide-energy
+			person to reach out to: 
 		</div>
 
 		<div id='map'>
 			<%= render "map" %>
+		</div>
+
+		<div id="controls">
+			<%= form_tag do %>
+				<%= radio_button_tag(:scale, "absolute", value: true) %>
+				<%= label_tag(:scale_absolute, "Absolute") %>
+				<%= radio_button_tag(:scale, "relative") %>
+				<%= label_tag(:scale_relative, "Relative") %>
+			<% end %>
 		</div>
 
 		<h1 id="year"></h1>
@@ -25,12 +40,11 @@
 			  		<% end %>
 				  		<div class="val_chooser" style="background-color: <%=  %>">
 							<%= @translations[type] %>:
-							<div style="height:150px" id=<%= "#{type}" %>></div>
-							<input type="number" style="width: 50px;" value="<%= score %>" id=<%= "#{type}_box" %>></input>
+							<div style="height:150px" id=<%= "#{type}_slider" %>></div>
+							<input type="number" style="width: 50px;" value="<%= score %>" id=<%= "#{type}_input" %>></input>
 						</div>
 			  	<% end %>
 		  	</div>
 		</div>
-
-	</body>
-</center>
+	</center>
+</body>

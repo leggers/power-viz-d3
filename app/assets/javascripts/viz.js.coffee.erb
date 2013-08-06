@@ -5,7 +5,7 @@
 
 #######################################
 #
-# Global variables
+# Global variables (malpractice?)
 #
 #######################################
 
@@ -16,14 +16,106 @@ _percentages = {}
 _totals = {}
 _max = 2012
 _min = 2001
-_index = 0
-margins = {top: 20, right: 20, bottom: 20, left: 20}
+_index1 = 0
+_index2 = 0
+margins = {top: 50, right: 15, bottom: 20, left: 60}
 width = 959
 height = 593
 pie_colors = undefined
 chart_group = undefined
 tooltip = undefined
+translations = undefined
 to_compare = []
+
+###########################################
+#
+# Setting up (fire when ready!)
+#
+###########################################
+
+$ ->
+    chart_group = d3.select("#chart_group")
+    width = d3.select('svg')[0][0].width.baseVal.value
+    height = d3.select('svg')[0][0].height.baseVal.value
+    pie_colors = gon.pie_colors
+    translations = gon.translations
+
+    for abbrev in gon.state_abbrevs
+        calculate_scores(abbrev)
+        calculate_percentages(abbrev)
+
+    # setting up green-ness sliders
+    for type, weight of gon.green
+        $("##{type}_slider").slider({
+            animate: true,
+            max: 10,
+            min: -10,
+            step: .1,
+            orientation: "vertical",
+            value: weight,
+            slide: (event, ui) ->
+                change_green_val(ui.handle.parentElement.id.slice(0, -7), ui.value)
+            })
+        $("##{type}_input").on('change', (eventObject) ->
+            change_green_val(this.id.slice(0, -6), this.value)
+            )
+
+    # setting up year slider
+    $("#time").slider({
+        animate: true,
+        max: _max,
+        min: _min,
+        orientation: "horizontal",
+        step: 1,
+        value: _max,
+        slide: (event, ui) ->
+            $('#year').text("Year: #{ui.value}")
+            _index1 = _max - ui.value
+            update_bars()
+            d3.selectAll("##{state}").attr('fill', fill_color(state)) for state in gon.state_abbrevs
+        })
+
+    $('#year').text("Year: #{_max} (change with the slider below)")
+
+    d3.selectAll('.state')
+        .attr('fill', 'white')
+        .attr('stroke', 'white')
+        .attr('stroke-width', '0.75')
+        .on('mouseover', () ->
+            state_hover(this.id)
+        )
+        .on('mouseleave', () ->
+            state_unhover(this.id)
+        )
+        .on('click', () ->
+            if to_compare.indexOf(this.id) == -1
+                to_compare[to_compare.length] = this.id
+            make_chart()
+        )
+        .transition()
+            .duration(500)
+            .delay( (d,i) ->
+                i * 40
+            )
+            .attr('fill', () ->
+                abbrev = this.id
+                fill_color(abbrev)
+            )
+
+    tooltip = d3.select('body').append('div')
+        .attr('class', 'tooltip')
+        .style('opacity', 0)
+
+    d3.select('body')
+        .on('keydown', () ->
+            show_map(false) if d3.event.keyCode == 27
+        )
+
+    $('#scale_absolute').on('click', update_bars)
+    $('#scale_relative').on('click', update_bars)
+
+    to_compare = ['WA', 'FL', 'TX']
+    make_chart()
 
 #######################################
 #
@@ -71,46 +163,58 @@ calculate_percentages = (state) ->
 
 ###########################################
 #
-# Slider stuff
+# Visual Manipulation (the changing of things)
 #
 ###########################################
+
+state_hover = (id) ->
+    bring_to_top(id)
+    d3.selectAll("##{id}")
+        .attr('fill', fill_color(id))
+        .transition().duration(200)
+            .attr('stroke', 'black')
+            .attr('stroke-width', '1.5')
+
+state_unhover = (id) ->
+    d3.selectAll("##{id}")
+        .attr('fill', fill_color(id))
+        .transition().duration(200)
+            .attr('stroke', 'white')
+            .attr('stroke-width', '0.75')
 
 # what happens when someone changes a green-ness score
 change_green_val = (type, value) ->
-    $("##{type}").slider("value", value)
-    $("##{type}_box").val(value)
+    $("##{type}_slider").slider("value", value)
+    $("##{type}_input").val(value)
     gon.green[type] = value
     for state in gon.state_abbrevs
         calculate_scores(state) 
-        d3.select("##{state}").attr('fill', fill_color(state))
-
-###########################################
-#
-# Visual functions (coloring, map manipulation, and tooltip)
-#
-###########################################
+        d3.selectAll("##{state}").attr('fill', fill_color(state))
 
 fill_color = (state) ->
     scores = _scores[state]
     totals = _totals[state]
-    if scores[_index] > 0
-        color = green_scale(scores[_index]/totals[_index])
+    if scores[_index1] > 0
+        color = green_scale(scores[_index1]/totals[_index1])
     else
-        color = red_scale(-scores[_index]/totals[_index])
+        color = red_scale(-scores[_index1]/totals[_index1])
     return color
 
 bring_to_top = (id_to_top) ->
     d3.selectAll('path').datum(-1)
     d3.select("##{id_to_top}").datum(1)
     d3.selectAll('path').sort().order()
-    d3.select('#MI-').attr('fill', fill_color("MI"))
-    d3.select('#SP-').attr('fill', fill_color("MI"))
 
 show_map = (comparing) ->
-    d3.selectAll('#chart_group').selectAll('g').remove()
-    d3.select('#chart_group').selectAll('rect').remove()
+    chart_group.selectAll('g').remove()
+    chart_group.selectAll('rect').remove()
+    chart_group.selectAll('text')
     d3.select('#close').remove()
+    $('#controls').hide()
     d3.select('#compare').remove()
+    d3.select('#controls_toggle')
+    d3.selectAll('.legend_label').remove()
+    d3.selectAll('.bar_label').remove()
     to_compare.length = 0 if not comparing
 
 show_tooltip = () ->
@@ -129,6 +233,92 @@ hide_tooltip = () ->
         .duration(300)
         .style('opacity', 0)
 
+legend_positions = (index) ->
+    x = 125 * Math.floor(index/2) + 15
+    y = 25 * (index % 2) + 5
+    [x, y]
+
+highlight_bars = (focused) ->
+    labels = get_labels()
+    for state_id in to_compare
+        for label in labels
+            bars = d3.select("##{state_id}_#{label}_bar")
+            box = d3.select("##{label}_box")
+            text = d3.select("##{label}_label")
+            d3.select('#veil')
+                .transition().duration(200)
+                    .attr('opacity', .9)
+            if focused.indexOf(label) > -1
+                bars.transition().duration(150)
+                    .attr('opacity', 1)
+                box.transition().duration(200)
+                    .attr('opacity', 1)
+                text.transition().duration(200)
+                    .attr('opacity', 1)
+            else
+                bars.transition().duration(150)
+                    .attr('opacity', .1)
+                box.transition().duration(200)
+                    .attr('opacity', .2)
+                text.transition().duration(200)
+                    .attr('opacity', .2)
+
+# shows all bars unless there are some focused, then only shows those
+unhighlight_bars = () ->
+    focused = get_focused()
+    labels = get_labels()
+    # some types are being focused
+    if focused.length > 0
+        highlight_bars(focused)
+    # if no energy types have been focused on
+    else
+        d3.select('#veil')
+            .transition().duration(700)
+                .attr('opacity', .75)
+        d3.selectAll('.legend_box')
+            .transition().duration(200)
+                .attr('opacity', 1)
+        d3.selectAll('.bar')
+            .transition().duration(150)
+                .attr('opacity', 1)
+        d3.selectAll('.legend_label')
+            .transition().duration(200)
+                .attr('opacity', 1)
+    
+update_bars = () ->
+    absolute = get_absolute()
+    x_scale = add_axis(absolute)
+    for state_id in to_compare
+        data = get_chart_data(state_id, absolute)
+        labels = data[0]
+        numbers = data[1]
+        for label in labels
+            d3.selectAll("##{state_id}_#{label}_bar")
+                .datum(numbers[labels.indexOf(label)])
+                .transition().duration(200)
+                    # .delay( (d, i) ->
+                    #     i * 50
+                    # )
+                    .attr('x', (d, i) ->
+                        bar_x(numbers, labels.indexOf(label), x_scale)
+                    )
+                    .attr('width', (d, i) ->
+                        x_scale(Math.abs(d))
+                    )
+
+toggle_controls = () ->
+    controls = $('#controls')
+    if controls.is(':visible')
+        controls.hide()
+    else
+        controls.show()
+
+###########################################
+#
+# Visual Setup (the placing of things)
+#
+###########################################
+
 setup_chart = () ->
     chart_group.append('rect')
         .attr('id', 'veil')
@@ -140,52 +330,79 @@ setup_chart = () ->
     chart_group.append('rect')
         .attr('id', 'top_stuff')
         .attr('width', width)
-        .attr('height', 50)
+        .attr('height', margins['top'])
         .attr('fill', 'white')
         .attr('opacity', 0.75)
+
+    add_legend()
     
     chart_group.append('text')
         .attr('id', 'close')
-        .attr('x', 15)
-        .attr('y', 45)
+        .attr('x', 870)
+        .attr('y', 580)
         .text("Close")
-        .attr('font-size', '50px')
-        .attr('id', 'close')
-        .attr('fill', 'black')
-        .attr('font-family', 'sans-serif')
         .on('click', () -> show_map(false))
 
     chart_group.append('text')
         .attr('id', 'compare')
-        .attr('x', 15)
-        .attr('y', height - 50)
+        .attr('x', 10)
+        .attr('y', 580)
         .text('Compare')
-        .attr('font-size', '50px')
-        .attr('id', 'compare')
-        .attr('font-family', 'sans-serif')
+        .attr('font-size', 25)
         .on('click', () -> show_map(true))
 
-###########################################
-#
-# Bar chart things
-#
-###########################################
+    chart_group.append('text')
+        .attr('id', 'controls_toggle')
+        .attr('x', 410)
+        .attr('y', 580)
+        .text('Controls')
+        .on('click', toggle_controls)
 
-get_chart_data = (state_id, absolute) ->
-    labels = []
-    numbers = []
-    if absolute
-        for type, series of gon.elec_data[state_id]
-            labels[labels.length] = type
-            to_append = series[_index][1]
-            to_append = 0 unless to_append # gets rid of undefined's
-            numbers[numbers.length] = to_append
-    else
-        for type, series of _percentages[state_id]
-            labels[labels.length] = type
-            numbers[numbers.length] = series[_index]
-    console.log([labels, numbers])
-    return [labels, numbers]
+add_legend = () ->
+    index = 0
+    for type, color of pie_colors
+        positions = legend_positions(index)
+        x = positions[0]
+        y = positions[1]
+        chart_group.append('rect')
+            .datum(false)
+            .attr('class', 'legend_box')
+            .attr('id', "#{type}_box")
+            .attr('fill', color)
+            .attr('stroke', 'white')
+            .attr('stroke-width', .75)
+            .attr('width', 16)
+            .attr('height', 16)
+            .attr('x', () -> x )
+            .attr('y', () -> y )
+            .on('mouseover', () ->
+                highlight_bars([this.id.slice(0, -4)])
+            )
+            .on('mouseleave', unhighlight_bars)
+            .on('click', () ->
+                focus_bars(this.id.slice(0, -4))
+            )
+
+        chart_group.append('text')
+            .attr('class', 'legend_label')
+            .attr('id', "#{type}_label")
+            .text(translations[type])
+            .attr('x', () -> x + 20 )
+            .attr('y', () -> y + 13 )
+            .attr('font-size', () ->
+                smaller = ['pet_coke', 'pet_liquid', 'other_renew', 'other_gases']
+                # console.log(type)
+                if smaller.indexOf(this.id.slice(0, -6)) > -1
+                    12
+                else
+                    17
+            )
+            .on('mouseover', () ->
+                highlight_bars([this.id.slice(0, -6)])
+            )
+            .on('mouseleave', unhighlight_bars)
+        index += 1
+
 
 add_states = () ->
     chart_group.selectAll('g')
@@ -195,6 +412,113 @@ add_states = () ->
             .attr('id', (d, i) ->
                 d + "_bars"
             )
+
+add_axis = (absolute) ->
+    d3.select('.axis').remove()
+    x_scale = get_x_scale(absolute)
+    chart_group.append('g').call(
+        d3.svg.axis()
+            .scale(x_scale)
+            .orient('bottom')
+    )
+        .attr('class', 'axis')
+        .attr('transform', "translate(#{margins['left']}, #{margins['top']})")
+    x_scale
+
+add_bars = () ->
+    absolute = get_absolute()
+    x_scale = add_axis(absolute)
+    for state_id in to_compare
+        data = get_chart_data(state_id, absolute)
+        labels = data[0]
+        numbers = data[1]
+        d3.select("##{state_id}_bars").selectAll('rect')
+            .data(numbers)
+            .enter()
+            .append('rect')
+                .attr('class', 'bar')
+                .attr('id', (d, i) ->
+                    "#{state_id}_#{labels[i]}_bar"
+                )
+                .attr('y', (d, i) ->
+                    bar_y("#{state_id}_bars")
+                )
+                .attr('x', (d, i) ->
+                    bar_x(numbers, i, x_scale)
+                )
+                .attr('width', () ->
+                    0
+                )
+                .attr('height', 18)
+                .attr('fill', (d, i) ->
+                    pie_colors[labels[i]]
+                )
+                .attr('opacity', 1)
+                .on('mouseover', () ->
+                    highlight_bars([this.id.slice(3, -4)])
+                )
+                .on('mousemove', (d, i) ->
+                    tooltip_says("#{translations[labels[i]]}: #{Math.round(d)}")
+                )
+                .on('click', () ->
+                    focus_bars(this.id.slice(3, -4))
+                )
+                .on('mouseleave', unhighlight_bars)
+                .transition().duration(500)
+                    .delay( (d, i) ->
+                        i * 50
+                    )
+                    .attr('width', (d, i) ->
+                        x_scale(Math.abs(d))
+                    )
+
+
+add_labels = () ->
+    for state_id in to_compare
+        chart_group.append('text')
+            .attr('id', "#{state_id}_label")
+            .attr('class', 'bar_label')
+            .attr('x', 0)
+            .attr('y', () -> bar_y("#{state_id}_bars") + 18 )
+            .text("#{state_id}")
+
+
+###########################################
+#
+# Barchart Backend
+#
+###########################################
+
+bar_x = (numbers, i, x_scale) ->
+    start = margins['left']
+    if numbers[i] > 0
+        for j in [0...i] by 1
+            start += x_scale(numbers[j]) if numbers[j] > 0
+    else
+        for j in [0..i] by 1
+            start += x_scale(numbers[j]) if numbers[j] < 0
+    start
+
+get_chart_data = (state_id, absolute) ->
+    labels = []
+    numbers = []
+    if absolute
+        for type, series of gon.elec_data[state_id]
+            labels[labels.length] = type
+            to_append = series[_index1][1]
+            to_append = 0 unless to_append # gets rid of undefined's
+            numbers[numbers.length] = to_append
+    else
+        for type, series of _percentages[state_id]
+            labels[labels.length] = type
+            numbers[numbers.length] = series[_index1]
+    return [labels, numbers]
+
+get_labels = () ->
+    labels = []
+    for type, trans of translations
+        labels[labels.length] = type
+    labels
 
 get_x_scale = (absolute) ->
     max = 0
@@ -208,7 +532,7 @@ get_x_scale = (absolute) ->
         .domain([0, max])
         .range([0, width - margins['left'] - margins['right']])
 
-bar_position = (bar_id) ->
+bar_y = (bar_id) ->
     num_bars = 1
     bar_num = 0
     for g in chart_group.selectAll('g')[0]
@@ -217,59 +541,21 @@ bar_position = (bar_id) ->
             num_bars += 1
     height * bar_num / num_bars
 
-add_axis = (absolute) ->
-    x_scale = get_x_scale(absolute)
-    chart_group.append('g').call(
-        d3.svg.axis()
-            .scale(x_scale)
-            .orient('bottom')
-    )
-        .attr('class', 'axis')
-        .attr('transform', "translate(#{margins['left']}, 50)")
-    x_scale
+focus_bars = (type) ->
+    box = d3.select("##{type}_box")
+    box.datum(!box.datum())
 
-add_bars = () ->
-    absolute = true
-    x_scale = add_axis(absolute)
-    for state_id in to_compare
-        console.log("adding #{state_id}")
-        data = get_chart_data(state_id, absolute)
-        labels = data[0]
-        numbers = data[1]
-        d3.select("##{state_id}_bars").selectAll('rect')
-            .data(numbers)
-            .enter()
-            .append('rect')
-                .attr('id', (d, i) ->
-                    "#{state_id}_#{labels[i]}_bar"
-                )
-                .attr('y', (d, i) ->
-                    bar_position("#{state_id}_bars")
-                )
-                .attr('height', 18)
-                .attr('width', (d, i) ->
-                    x_scale(d) or 0
-                )
-                .attr('fill', (d, i) ->
-                    pie_colors[labels[i]]
-                )
-                .attr('x', (d, i) ->
-                    prev_bar = d3.select("##{this.id}").property('previousSibling')
-                    if i > 0
-                        prev_bar.width.baseVal.value + prev_bar.x.baseVal.value
-                    else
-                        margins['left']
-                )
-                .on('mouseover', show_tooltip)
-                .on('mousemove', (d, i) ->
-                    tooltip_says("#{labels[i]}: #{d}")
-                )
-                .on('mouseleave', hide_tooltip)
+get_focused = () ->
+    toReturn = []
+    labels = get_labels()
+    for label in labels
+        box = d3.select("##{label}_box")
+        if box.datum()
+            toReturn[toReturn.length] = label
+    toReturn
 
-#selects all of the rectangles in a group for a state then animates them to their new values
-update_bars = () ->
-    # for id in to_compare
-    0
+get_absolute = () ->
+    $('#scale_absolute').is(':checked')
 
 # steps:
 # 1) bring veil to front
@@ -277,93 +563,7 @@ update_bars = () ->
 # 3) add groups for each bar (make the attr the color the bar)
 # 4) add rects to the above groups
 make_chart = () ->
-    console.log(to_compare)
     setup_chart()
     add_states()
     add_bars()
-
-###########################################
-#
-# Setting up map
-#
-###########################################
-
-$ ->
-    chart_group = d3.select("#chart_group")
-    width = d3.select('svg')[0][0].width.baseVal.value
-    height = d3.select('svg')[0][0].height.baseVal.value
-    pie_colors = gon.pie_colors
-
-    for abbrev in gon.state_abbrevs
-        calculate_scores(abbrev)
-        calculate_percentages(abbrev)
-
-    # setting up green-ness sliders
-    for type, weight of gon.green
-        $("##{type}").slider({
-            animate: true,
-            max: 10,
-            min: -10,
-            step: .1,
-            orientation: "vertical",
-            value: weight,
-            slide: (event, ui) ->
-                change_green_val(ui.handle.parentElement.id, ui.value)
-            })
-        $("##{type}_box").on('change', (eventObject) ->
-            change_green_val(this.id.slice(0, -4), this.value)
-            )
-
-    # setting up year slider
-    $("#time").slider({
-        animate: true,
-        max: _max,
-        min: _min,
-        orientation: "horizontal",
-        step: 1,
-        value: _max,
-        slide: (event, ui) ->
-            $('#year').text("Year: #{ui.value}")
-            _index = _max - ui.value
-            update_bars()
-            d3.select("##{state}").attr('fill', fill_color(state)) for state in gon.state_abbrevs
-        })
-
-    $('#year').text("Year: #{_max} (change with the slider below)")
-
-    d3.selectAll('.state')
-        .attr('fill', 'white')
-        .attr('stroke', 'white')
-        .attr('stroke-width', '0.75')
-        .on('mouseover', () ->
-            bring_to_top(this.id)
-            d3.selectAll("##{this.id}")
-                .attr('fill', fill_color(this.id))
-                .transition().duration(200)
-                    .attr('stroke', 'black')
-                    .attr('stroke-width', '1.5')
-        )
-        .on('mouseleave', () ->
-            d3.selectAll("##{this.id}")
-                .attr('fill', fill_color(this.id))
-                .transition().duration(200)
-                    .attr('stroke', 'white')
-                    .attr('stroke-width', '0.75')
-        )
-        .on('click', () ->
-            to_compare[to_compare.length] = this.id
-            make_chart()
-        )
-        .transition()
-            .duration(500)
-            .delay( (d,i) ->
-                i * 40
-            )
-            .attr('fill', () ->
-                abbrev = this.id
-                fill_color(abbrev)
-            )
-
-    tooltip = d3.select('body').append('div')
-        .attr('class', 'tooltip')
-        .style('opacity', 0)
+    add_labels()

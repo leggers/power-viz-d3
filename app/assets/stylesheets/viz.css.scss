@@ -31,3 +31,25 @@ div.val_chooser {
   float: left;
   border: 1px solid gray;
 }
+
+body {
+  font-family: sans-serif;
+  width: 959px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.bar_label {
+  font-size: 25px;
+}
+
+text#close {
+  fill: black;
+  font-size: 25px;
+}
+
+text#controls {
+  fill: black;
+  font-size: 30px;
+}
+
