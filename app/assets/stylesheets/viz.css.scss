@@ -34,9 +34,21 @@ div.val_chooser {
 
 body {
   font-family: sans-serif;
-  width: 959px;
+  width: 960px;
   margin-right: auto;
   margin-left: auto;
+}
+
+#map_controls {
+  width: 480px;
+  height: 50px;
+  float: left;
+}
+
+#chart_controls {
+  width: 480px;
+  height: 50px;
+  float: left;
 }
 
 .bar_label {
@@ -53,3 +65,7 @@ text#controls {
   font-size: 30px;
 }
 
+#year_span {
+  width: 800px;
+  text-align: center;
+}

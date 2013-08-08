@@ -33,7 +33,7 @@ end
 
 def fill_out_series series
     stop = false
-    p series
+    # p series
     start_year = series["start"].to_i
     data = series["data"]
     if start_year > @min_year

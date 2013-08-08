@@ -26,7 +26,7 @@ chart_group = undefined
 tooltip = undefined
 translations = undefined
 to_compare = []
-
+chart_x_scale = undefined
 
 ###########################################
 #
@@ -78,10 +78,9 @@ $ ->
 
     $('#year').text("Year: #{_max} (change with the slider below)")
 
+    states_fade_in()
+
     d3.selectAll('.state')
-        .attr('fill', 'white')
-        .attr('stroke', 'white')
-        .attr('stroke-width', '0.75')
         .on('mouseover', () ->
             state_hover(this.id)
         )
@@ -89,19 +88,8 @@ $ ->
             state_unhover(this.id)
         )
         .on('click', () ->
-            if to_compare.indexOf(this.id) == -1
-                to_compare[to_compare.length] = this.id
-            make_chart()
+            default_click(this.id)
         )
-        .transition()
-            .duration(500)
-            .delay( (d,i) ->
-                i * 40
-            )
-            .attr('fill', () ->
-                abbrev = this.id
-                fill_color(abbrev)
-            )
 
     tooltip = d3.select('body').append('div')
         .attr('class', 'tooltip')
@@ -114,7 +102,17 @@ $ ->
 
     $('#scale_absolute').on('click', update_bars)
     $('#scale_relative').on('click', update_bars)
+    $('#make_chart').hide()
     $('#controls').hide()
+    $('#close').hide()
+    $('#replay').on('click', states_fade_in)
+    $('#compare').on('click', compare_states_mode)
+    $('#make_chart').on('click', make_chart)
+    $('#close').on('click', () ->
+        show_map(false)
+    )
+    $('#controls_toggle').on('click', toggle_controls)
+    $('#mode').on('click', temporal_mode) # need to make this function
 
     # to_compare = ['WA', 'FL', 'TX']
     # make_chart()
@@ -169,6 +167,21 @@ calculate_percentages = (state) ->
 #
 ###########################################
 
+states_fade_in = () ->
+    d3.selectAll('.state')
+        .attr('fill', 'white')
+        .attr('stroke', 'white')
+        .attr('stroke-width', '0.75')
+        .transition()
+            .duration(500)
+            .delay( (d,i) ->
+                i * 40
+            )
+            .attr('fill', () ->
+                abbrev = this.id
+                fill_color(abbrev)
+            )
+
 state_hover = (id) ->
     bring_to_top(id)
     d3.selectAll("##{id}")
@@ -178,11 +191,12 @@ state_hover = (id) ->
             .attr('stroke-width', '1.5')
 
 state_unhover = (id) ->
-    d3.selectAll("##{id}")
-        .attr('fill', fill_color(id))
-        .transition().duration(200)
-            .attr('stroke', 'white')
-            .attr('stroke-width', '0.75')
+    unless d3.select("##{id}").datum() == 2
+        d3.selectAll("##{id}")
+            .attr('fill', fill_color(id))
+            .transition().duration(200)
+                .attr('stroke', 'white')
+                .attr('stroke-width', '0.75')
 
 # what happens when someone changes a green-ness score
 change_green_val = (type, value) ->
@@ -205,19 +219,18 @@ fill_color = (state) ->
 bring_to_top = (id_to_top) ->
     d3.selectAll('path').datum(-1)
     d3.select("##{id_to_top}").datum(1)
+    d3.select("##{state}").datum(2) for state in to_compare
     d3.selectAll('path').sort().order()
 
 show_map = (comparing) ->
     chart_group.selectAll('g').remove()
     chart_group.selectAll('rect').remove()
     chart_group.selectAll('text')
-    d3.select('#close').remove()
-    $('#controls').hide()
-    d3.select('#compare').remove()
-    d3.select('#controls_toggle').remove()
+    $('#close').hide()
     d3.selectAll('.legend_label').remove()
     d3.selectAll('.bar_label').remove()
     to_compare.length = 0 if not comparing
+    regular_state_mode()
 
 show_tooltip = () ->
     tooltip.transition()
@@ -240,25 +253,36 @@ legend_positions = (index) ->
     y = 25 * (index % 2) + 5
     [x, y]
 
-highlight_bars = (focused) ->
+ensure_proper_size = () ->
     labels = get_labels()
     for state_id in to_compare
         for label in labels
-            bars = d3.select("##{state_id}_#{label}_bar")
+            bar = d3.select("##{state_id}_#{label}_bar")
+
+            bar.attr('width', () ->
+                chart_x_scale(Math.abs(bar.data()))
+            )
+
+highlight_bars = (focused) ->
+    ensure_proper_size()
+    labels = get_labels()
+    for state_id in to_compare
+        for label in labels
+            bar = d3.select("##{state_id}_#{label}_bar")
             box = d3.select("##{label}_box")
             text = d3.select("##{label}_label")
             d3.select('#veil')
                 .transition().duration(200)
                     .attr('opacity', .9)
             if focused.indexOf(label) > -1
-                bars.transition().duration(150)
+                bar.transition().duration(150)
                     .attr('opacity', 1)
                 box.transition().duration(200)
                     .attr('opacity', 1)
                 text.transition().duration(200)
                     .attr('opacity', 1)
             else
-                bars.transition().duration(150)
+                bar.transition().duration(150)
                     .attr('opacity', .1)
                 box.transition().duration(200)
                     .attr('opacity', .2)
@@ -267,6 +291,7 @@ highlight_bars = (focused) ->
 
 # shows all bars unless there are some focused, then only shows those
 unhighlight_bars = () ->
+    ensure_proper_size()
     focused = get_focused()
     labels = get_labels()
     # some types are being focused
@@ -290,6 +315,11 @@ unhighlight_bars = () ->
 update_bars = () ->
     absolute = get_absolute()
     x_scale = add_axis(absolute)
+    # if chart_x_scale
+    #     console.log(x_scale.domain())
+    #     console.log(chart_x_scale.domain())
+    #     if x_scale.domain()[1] > chart_x_scale.domain()[1]
+    #         chart_x_scale.domain(x_scale.domain())
     for state_id in to_compare
         data = get_chart_data(state_id, absolute)
         labels = data[0]
@@ -298,9 +328,6 @@ update_bars = () ->
             d3.selectAll("##{state_id}_#{label}_bar")
                 .datum(numbers[labels.indexOf(label)])
                 .transition().duration(200)
-                    # .delay( (d, i) ->
-                    #     i * 50
-                    # )
                     .attr('x', (d, i) ->
                         bar_x(numbers, labels.indexOf(label), x_scale)
                     )
@@ -311,9 +338,9 @@ update_bars = () ->
 toggle_controls = () ->
     controls = $('#controls')
     if controls.is(':visible')
-        controls.hide()
+        controls.slideUp()
     else
-        controls.show()
+        controls.slideDown()
 
 ###########################################
 #
@@ -322,6 +349,8 @@ toggle_controls = () ->
 ###########################################
 
 setup_chart = () ->
+    console.log(to_compare)
+
     chart_group.append('rect')
         .attr('id', 'veil')
         .attr('width', width)
@@ -337,28 +366,6 @@ setup_chart = () ->
         .attr('opacity', 0.75)
 
     add_legend()
-    
-    chart_group.append('text')
-        .attr('id', 'close')
-        .attr('x', 870)
-        .attr('y', 580)
-        .text("Close")
-        .on('click', () -> show_map(false))
-
-    chart_group.append('text')
-        .attr('id', 'compare')
-        .attr('x', 10)
-        .attr('y', 580)
-        .text('Compare')
-        .attr('font-size', 25)
-        .on('click', () -> show_map(true))
-
-    chart_group.append('text')
-        .attr('id', 'controls_toggle')
-        .attr('x', 410)
-        .attr('y', 580)
-        .text('Controls')
-        .on('click', toggle_controls)
 
     $('#controls').slideDown()
 
@@ -432,6 +439,7 @@ add_axis = (absolute) ->
 add_bars = () ->
     absolute = get_absolute()
     x_scale = add_axis(absolute)
+    chart_x_scale = x_scale
     for state_id in to_compare
         data = get_chart_data(state_id, absolute)
         labels = data[0]
@@ -461,9 +469,9 @@ add_bars = () ->
                 .on('mouseover', () ->
                     highlight_bars([this.id.slice(3, -4)])
                 )
-                .on('mousemove', (d, i) ->
-                    tooltip_says("#{translations[labels[i]]}: #{Math.round(d)}")
-                )
+                # .on('mousemove', (d, i) ->
+                #     tooltip_says("#{translations[labels[i]]}: #{Math.round(d)}")
+                # )
                 .on('click', () ->
                     focus_bars(this.id.slice(3, -4))
                 )
@@ -475,7 +483,6 @@ add_bars = () ->
                     .attr('width', (d, i) ->
                         x_scale(Math.abs(d))
                     )
-
 
 add_labels = () ->
     for state_id in to_compare
@@ -566,12 +573,49 @@ get_focused = () ->
 get_absolute = () ->
     $('#scale_absolute').is(':checked')
 
+default_click = (id) ->
+    to_compare[to_compare.length] = id
+    make_chart()
+
+compare_click = (id) ->
+    if to_compare.indexOf(id) == -1
+        to_compare[to_compare.length] = id
+        d3.select("##{id}").datum(2)
+        state_hover(id)
+    else
+        to_compare.splice(to_compare.indexOf(id), 1)
+        d3.select("##{id}").datum(0)
+        state_unhover(id)
+
+compare_states_mode = () ->
+    show_map(false)
+    $('#compare').hide()
+    $('#make_chart').show()
+    d3.selectAll('.state')
+        .on('click', null)
+        .on('click', () ->
+            compare_click(this.id)
+        )
+
+regular_state_mode = () ->
+    for abbrev in gon.state_abbrevs
+        state_unhover(abbrev)
+    $('#make_chart').hide()
+    $('#compare').show()
+    d3.selectAll('.state')
+        .on('click', null)
+        .on('click', () ->
+            default_click(this.id)
+        )
+
 # steps:
 # 1) bring veil to front
 # 2) add a group for the state, assign them data that will bring them to front (sort?)
 # 3) add groups for each bar (make the attr the color the bar)
 # 4) add rects to the above groups
 make_chart = () ->
+    $('#close').show()
+    regular_state_mode()
     setup_chart()
     add_states()
     add_bars()

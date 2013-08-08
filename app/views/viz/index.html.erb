@@ -18,13 +18,26 @@
 			<%= render "map" %>
 		</div>
 
+		<span id="controls_toggle">Toggle Controls</span>
+
 		<div id="controls">
-			<%= form_tag do %>
-				<%= radio_button_tag(:scale, "absolute", value: true) %>
-				<%= label_tag(:scale_absolute, "Absolute") %>
-				<%= radio_button_tag(:scale, "relative") %>
-				<%= label_tag(:scale_relative, "Relative") %>
-			<% end %>
+			<div id="map_controls">
+				<span id="replay">Replay State Fade-In</span>
+				<br>
+				<span id="compare">Compare States</span>
+				<span id="make_chart">Make Chart</span>
+				<br>
+				<span id="mode">See changes with time</span>
+			</div>
+			<div id="chart_controls">
+				<%= form_tag do %>
+					<%= radio_button_tag(:scale, "absolute", value: true) %>
+					<%= label_tag(:scale_absolute, "Absolute") %>
+					<%= radio_button_tag(:scale, "relative") %>
+					<%= label_tag(:scale_relative, "Relative") %>
+					<span id="close"><br>Close Chart<br></span>
+				<% end %>
+			</div>
 		</div>
 
 		<h1 id="year"></h1>
