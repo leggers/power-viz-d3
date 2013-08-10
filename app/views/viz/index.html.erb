@@ -5,6 +5,9 @@
 <body>
 	<center>
 		<div id="top_paragraph">
+			"Clean" and "Green" 
+			
+
 			Below is a map representing the "green-ness" of the electricity generated in each state of the US (except Alaska and Hawaii, coming soon!). The data were pulled from the beta API of the <%= link_to "Energy Information Agency", "http://www.eia.gov" %>. Packages used to make this were d3.js, jQuery and jQuery-ui.
 
 			TALK LATER about hydro_pumped energy. It's a compensatory measure states take to prevent using non-green power sources during peak hours HOWEVER it's often a net negative for states! Crazy.
@@ -27,7 +30,8 @@
 				<span id="compare">Compare States</span>
 				<span id="make_chart">Make Chart</span>
 				<br>
-				<span id="mode">See changes with time</span>
+				<span id="temporal_mode">See which states have gotten better or worse (changes with time)</span>
+				<span id="static_mode">See one point in time</span>
 			</div>
 			<div id="chart_controls">
 				<%= form_tag do %>
@@ -37,11 +41,16 @@
 					<%= label_tag(:scale_relative, "Relative") %>
 					<span id="close"><br>Close Chart<br></span>
 				<% end %>
+				<br>
 			</div>
 		</div>
-
-		<h1 id="year"></h1>
-		<div id="time" style="width: 200px;"></div>
+		<br>
+		<span>
+			<hr>
+			<h1 id="year"></h1>
+			<div id="time" style="width: 200px;"></div>
+			<div id="year_compare" style="width: 200px;"></div>
+		</span>
 
 		<div id="weights">
 			<h1>Opinionated?</h1>

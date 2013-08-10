@@ -9,8 +9,8 @@
 #
 #######################################
 
-green_scale = d3.scale.linear().domain([0,1]).range(['grey', 'green'])
-red_scale = d3.scale.linear().domain([0,1]).range(['grey', 'red'])
+green_scale = d3.scale.linear().domain([0,10]).range(['grey', 'green'])
+red_scale = d3.scale.linear().domain([0,10]).range(['grey', 'red'])
 _scores = {}
 _percentages = {}
 _totals = {}
@@ -21,12 +21,13 @@ _index2 = 0
 margins = {top: 50, right: 15, bottom: 20, left: 60}
 width = 959
 height = 593
-pie_colors = undefined
+chart_colors = undefined
 chart_group = undefined
 tooltip = undefined
 translations = undefined
 to_compare = []
 chart_x_scale = undefined
+over_time = false
 
 ###########################################
 #
@@ -38,7 +39,7 @@ $ ->
     chart_group = d3.select("#chart_group")
     width = d3.select('svg')[0][0].width.baseVal.value
     height = d3.select('svg')[0][0].height.baseVal.value
-    pie_colors = gon.pie_colors
+    chart_colors = gon.pie_colors
     translations = gon.translations
 
     for abbrev in gon.state_abbrevs
@@ -75,8 +76,25 @@ $ ->
             update_bars()
             d3.selectAll("##{state}").attr('fill', fill_color(state)) for state in gon.state_abbrevs
         })
-
     $('#year').text("Year: #{_max} (change with the slider below)")
+
+    $('#year_compare').hide()
+    $('#year_compare').slider({
+        animate: true,
+        orientation: "horizontal",
+        step: 1,
+        range: true,
+        max: _max,
+        min: _min,
+        step: 1,
+        values: [_max - 2, _max],
+        slide: (event, ui) ->
+            _index1 = _max - ui.values[0]
+            _index2 = _max - ui.values[1]
+            $('#year').text("#{ui.values[0]} - #{ui.values[1]}")
+            update_bars()
+            d3.selectAll("##{state}").attr('fill', fill_color(state)) for state in gon.state_abbrevs
+        })
 
     states_fade_in()
 
@@ -112,7 +130,9 @@ $ ->
         show_map(false)
     )
     $('#controls_toggle').on('click', toggle_controls)
-    $('#mode').on('click', temporal_mode) # need to make this function
+    $('#temporal_mode').on('click', temporal_mode)
+    $('#static_mode').hide()
+    $('#static_mode').on('click', static_mode)
 
     # to_compare = ['WA', 'FL', 'TX']
     # make_chart()
@@ -167,6 +187,27 @@ calculate_percentages = (state) ->
 #
 ###########################################
 
+temporal_mode = () ->
+    over_time = true
+    $('#temporal_mode').hide()
+    $('#static_mode').show()
+    $('#time').slideUp()
+    $('#year_compare').slideDown()
+    values = $('#year_compare').slider('values')
+    $('#year').text("#{values[0]} - #{values[1]}")
+    _index1 = _max - values[0]
+    _index2 = _max - values[1]
+    d3.selectAll("##{state}").attr('fill', fill_color(state)) for state in gon.state_abbrevs
+
+static_mode = () ->
+    over_time = false
+    $('#static_mode').hide()
+    $('#temporal_mode').show()
+    $('#year_compare').slideUp()
+    $('#time').slideDown()
+    $('#year').text("#{$('#time').slider('value')}")
+    d3.selectAll("##{state}").attr('fill', fill_color(state)) for state in gon.state_abbrevs
+
 states_fade_in = () ->
     d3.selectAll('.state')
         .attr('fill', 'white')
@@ -208,13 +249,22 @@ change_green_val = (type, value) ->
         d3.selectAll("##{state}").attr('fill', fill_color(state))
 
 fill_color = (state) ->
-    scores = _scores[state]
-    totals = _totals[state]
-    if scores[_index1] > 0
-        color = green_scale(scores[_index1]/totals[_index1])
+    if over_time
+        gradient = (_scores[state][_index1] - _scores[state][_index2]) / _scores[state][_index1]
+        # console.log(state)
+        # console.log(gradient)
+        if gradient > 0
+            color = green_scale(gradient)
+        else
+            color = red_scale(-gradient)
+        return color
     else
-        color = red_scale(-scores[_index1]/totals[_index1])
-    return color
+        gradient = (_scores[state][_index1] / _totals[state][_index1]) * 10
+        if gradient > 0
+            color = green_scale(gradient)
+        else
+            color = red_scale(-gradient)
+        return color
 
 bring_to_top = (id_to_top) ->
     d3.selectAll('path').datum(-1)
@@ -226,10 +276,12 @@ show_map = (comparing) ->
     chart_group.selectAll('g').remove()
     chart_group.selectAll('rect').remove()
     chart_group.selectAll('text')
+    chart_group.selectAll('.layer').remove()
     $('#close').hide()
     d3.selectAll('.legend_label').remove()
     d3.selectAll('.bar_label').remove()
     to_compare.length = 0 if not comparing
+    chart_x_scale = null
     regular_state_mode()
 
 show_tooltip = () ->
@@ -264,6 +316,7 @@ ensure_proper_size = () ->
             )
 
 highlight_bars = (focused) ->
+    console.log(focused)
     ensure_proper_size()
     labels = get_labels()
     for state_id in to_compare
@@ -313,27 +366,30 @@ unhighlight_bars = () ->
                 .attr('opacity', 1)
     
 update_bars = () ->
-    absolute = get_absolute()
-    x_scale = add_axis(absolute)
-    # if chart_x_scale
-    #     console.log(x_scale.domain())
-    #     console.log(chart_x_scale.domain())
-    #     if x_scale.domain()[1] > chart_x_scale.domain()[1]
-    #         chart_x_scale.domain(x_scale.domain())
-    for state_id in to_compare
-        data = get_chart_data(state_id, absolute)
-        labels = data[0]
-        numbers = data[1]
-        for label in labels
-            d3.selectAll("##{state_id}_#{label}_bar")
-                .datum(numbers[labels.indexOf(label)])
-                .transition().duration(200)
-                    .attr('x', (d, i) ->
-                        bar_x(numbers, labels.indexOf(label), x_scale)
-                    )
-                    .attr('width', (d, i) ->
-                        x_scale(Math.abs(d))
-                    )
+    if chart_x_scale?
+        absolute = get_absolute()
+        console.log(absolute)
+        x_scale = add_axis(absolute)
+        chart_x_scale = x_scale
+        # if chart_x_scale
+        #     console.log(x_scale.domain())
+        #     console.log(chart_x_scale.domain())
+        #     if x_scale.domain()[1] > chart_x_scale.domain()[1]
+        #         chart_x_scale.domain(x_scale.domain())
+        for state_id in to_compare
+            data = get_chart_data(state_id, absolute)
+            labels = data[0]
+            numbers = data[1]
+            for label in labels
+                d3.selectAll("##{state_id}_#{label}_bar")
+                    .datum(numbers[labels.indexOf(label)])
+                    .transition().duration(200)
+                        .attr('x', (d, i) ->
+                            bar_x(numbers, labels.indexOf(label), x_scale)
+                        )
+                        .attr('width', (d, i) ->
+                            x_scale(Math.abs(d))
+                        )
 
 toggle_controls = () ->
     controls = $('#controls')
@@ -371,7 +427,7 @@ setup_chart = () ->
 
 add_legend = () ->
     index = 0
-    for type, color of pie_colors
+    for type, color of chart_colors
         positions = legend_positions(index)
         x = positions[0]
         y = positions[1]
@@ -463,7 +519,7 @@ add_bars = () ->
                 )
                 .attr('height', 18)
                 .attr('fill', (d, i) ->
-                    pie_colors[labels[i]]
+                    chart_colors[labels[i]]
                 )
                 .attr('opacity', 1)
                 .on('mouseover', () ->
@@ -555,7 +611,7 @@ bar_y = (bar_id) ->
         if g.id
             bar_num = num_bars if g.id == bar_id
             num_bars += 1
-    height * bar_num / num_bars
+    (height - margins['top']) * bar_num / num_bars
 
 focus_bars = (type) ->
     box = d3.select("##{type}_box")
@@ -574,6 +630,8 @@ get_absolute = () ->
     $('#scale_absolute').is(':checked')
 
 default_click = (id) ->
+    # console.log('default click')
+    # console.log(to_compare)
     to_compare[to_compare.length] = id
     make_chart()
 
@@ -588,7 +646,9 @@ compare_click = (id) ->
         state_unhover(id)
 
 compare_states_mode = () ->
-    show_map(false)
+    show_map(true)
+    for state in to_compare
+        state_hover(state)
     $('#compare').hide()
     $('#make_chart').show()
     d3.selectAll('.state')
@@ -608,6 +668,12 @@ regular_state_mode = () ->
             default_click(this.id)
         )
 
+bar_chart = () ->
+    add_states()
+    add_bars()
+    add_labels()
+
+
 # steps:
 # 1) bring veil to front
 # 2) add a group for the state, assign them data that will bring them to front (sort?)
@@ -617,6 +683,83 @@ make_chart = () ->
     $('#close').show()
     regular_state_mode()
     setup_chart()
-    add_states()
-    add_bars()
-    add_labels()
+    if over_time
+        streamgraph()
+    else
+        bar_chart()
+
+###########################################
+#
+# Streamgraph Stuff
+#
+###########################################
+
+streamgraph = () ->
+    stack = d3.layout.stack()
+        .offset('wiggle')
+        .values( (d) ->
+            d.values
+        )
+    layers = stack(stream_data())
+    stream_x = d3.scale.linear()
+        .domain([_max, _min])
+        .range([margins['left'], width - margins['right']])
+    stream_y = d3.scale.linear()
+        .domain([0, d3.max(layers, (d) ->
+            max_so_far = 0
+            for value in d.values
+                possible = value.y0 + value.y
+                max_so_far = possible if possible > max_so_far
+            max_so_far
+        )])
+        .range([margins['top'], height - margins['bottom']])
+    area = d3.svg.area()
+        .interpolate('cardinal')
+        .x( (d) -> stream_x(_min + d.x) )
+        .y0( (d) -> stream_y(d.y0) )
+        .y1( (d) -> stream_y(d.y0 + d.y) )
+
+    chart_group.selectAll('.layer')
+        .data(layers)
+        .enter().append('path')
+            .attr('class', 'layer')
+            .attr('d', (d) -> area(d.values) )
+            .attr('id', (d) -> "#{d.type}_layer" )
+            .style('fill', (d) -> chart_colors[d.type] )
+
+    chart_group.selectAll('.layer')
+        .attr('opacity', 1)
+        .on('mouseover', (d, i) ->
+            chart_group.selectAll('.layer').transition()
+            .duration(200)
+            .attr('opacity', (d, j) ->
+                .3 if j != i
+            )
+        )
+        .on('mouseleave', () ->
+            chart_group.selectAll('.layer')
+            .transition()
+            .duration(200)
+            .attr('opacity', 1)
+        )
+
+
+stream_data = () ->
+    time_series = gon.elec_data[to_compare[0]]
+    layers = []
+    for type, series of time_series
+        unless typeof series == typeof ""
+            layers[layers.length] = {
+                "type": "#{type}",
+                "name": "#{translations[type]}"
+                "values": make_hash_series(series)
+            }
+    layers    
+
+make_hash_series = (series) ->
+    hashed = []
+    for i in [0...series.length]
+        hashed[hashed.length] = {
+            "x": i,
+            "y": parseFloat(series[i][1])
+        }
