@@ -1,22 +1,30 @@
 <center>
-	<h1>What charges our cell phones, laptops and electric vehicles?</h1>
+	<h1>How green is our electricity?</h1>
 </center>
 
 <body>
-	<center>
-		<div id="top_paragraph">
-			"Clean" and "Green" 
-			
+	<div id="top_paragraph">
+		<p>
+			What charges our cell phones, laptops and electric vehicles?
+		</p>
 
-			Below is a map representing the "green-ness" of the electricity generated in each state of the US (except Alaska and Hawaii, coming soon!). The data were pulled from the beta API of the <%= link_to "Energy Information Agency", "http://www.eia.gov" %>. Packages used to make this were d3.js, jQuery and jQuery-ui.
+		<p>
+			Below is a map representing the "green-ness" of the electricity generated in each state of the US. The data were pulled from the beta API of the <%= link_to "Energy Information Agency", "http://www.eia.gov" %>. Packages used to make this were d3.js, jQuery and jQuery-ui.
+		</p>
 
+		<p>
 			TALK LATER about hydro_pumped energy. It's a compensatory measure states take to prevent using non-green power sources during peak hours HOWEVER it's often a net negative for states! Crazy.
+		</p>
 
+		<p>
 			stuff to ackowledge: http://www.theatlantic.com/special-report/users-guide-energy (can put that data on this map, too)
 			http://www.thenewyorkworld.com/2013/07/25/city-liberates-map-data-trove/ (pushing for more open data is great to learn about practices)
 			person to reach out to: 
-		</div>
+		</p>
+		
+	</div>
 
+	<center>
 		<div id='map'>
 			<%= render "map" %>
 		</div>
@@ -30,8 +38,8 @@
 				<span id="compare">Compare States</span>
 				<span id="make_chart">Make Chart</span>
 				<br>
-				<span id="temporal_mode">See which states have gotten better or worse (changes with time)</span>
-				<span id="static_mode">See one point in time</span>
+				<!-- <span id="temporal_mode">See which states have gotten better or worse (changes with time)</span> -->
+				<!-- <span id="static_mode">See one point in time</span> -->
 			</div>
 			<div id="chart_controls">
 				<%= form_tag do %>
