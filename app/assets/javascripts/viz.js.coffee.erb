@@ -18,7 +18,7 @@ _max = 2012
 _min = 2001
 _index1 = 0
 _index2 = 0
-margins = {top: 75, right: 27, bottom: 20, left: 90}
+margins = {top: 25, right: 100, bottom: 120, left: 50}
 width = 959
 height = 593
 chart_colors = undefined
@@ -130,6 +130,9 @@ $ ->
         show_map(false)
     )
     $('#controls_toggle').on('click', toggle_controls)
+    $('#equalizer').hide()
+    $('#equalizer_toggle').on('click', toggle_sliders)
+    $('#chart_controls').hide()
 
     # $('#temporal_mode').hide()
     # $('#temporal_mode').on('click', temporal_mode)
@@ -138,6 +141,40 @@ $ ->
 
     # to_compare = ['WA', 'FL', 'TX']
     # make_chart()
+
+
+    chart_group.append('rect')
+        .attr('id', 'veil')
+        .attr('width', width)
+        .attr('height', height)
+        .attr('fill', 'white')
+        .attr('opacity', '0.75')
+        .on('click', show_map)
+
+    chart_group.append('text')
+        .style('text-anchor', 'middle')
+        .attr('x', width/2)
+        .attr('y', height/2)
+        .attr('font-size', 25)
+        .text("Click a state to see its electricity history")
+        .on('click', show_map)
+
+    chart_group.append('foreignObject')
+        .on('click', show_map)
+        .attr('class', 'btn')
+        .attr('x', width/2 - 100)
+        .attr('y', height/2 + 20)
+        .attr('width', 200)
+        .attr('height', 40)
+        .attr('id', 'okay_button')
+
+    chart_group.append('text')
+        .style('text-anchor', 'middle')
+        .attr('x', width/2)
+        .attr('y', height/2 + 45)
+        .text('Alrighty!')
+        .attr('font-size', 20)
+        .on('click', show_map)
 
 #######################################
 #
@@ -189,27 +226,6 @@ calculate_percentages = (state) ->
 #
 ###########################################
 
-# temporal_mode = () ->
-#     over_time = true
-#     $('#temporal_mode').hide()
-#     $('#static_mode').show()
-#     $('#time').slideUp()
-#     $('#year_compare').slideDown()
-#     values = $('#year_compare').slider('values')
-#     $('#year').text("#{values[0]} - #{values[1]}")
-#     _index1 = _max - values[0]
-#     _index2 = _max - values[1]
-#     d3.selectAll("##{state}").attr('fill', fill_color(state)) for state in gon.state_abbrevs
-
-# static_mode = () ->
-#     over_time = false
-#     $('#static_mode').hide()
-#     $('#temporal_mode').show()
-#     $('#year_compare').slideUp()
-#     $('#time').slideDown()
-#     $('#year').text("#{$('#time').slider('value')}")
-#     d3.selectAll("##{state}").attr('fill', fill_color(state)) for state in gon.state_abbrevs
-
 states_fade_in = () ->
     d3.selectAll('.state')
         .attr('fill', 'white')
@@ -251,16 +267,6 @@ change_green_val = (type, value) ->
         d3.selectAll("##{state}").attr('fill', fill_color(state))
 
 fill_color = (state) ->
-    # if over_time
-    #     gradient = (_scores[state][_index1] - _scores[state][_index2]) / _scores[state][_index1]
-    #     # console.log(state)
-    #     # console.log(gradient)
-    #     if gradient > 0
-    #         color = green_scale(gradient)
-    #     else
-    #         color = red_scale(-gradient)
-    #     return color
-    # else
     gradient = (_scores[state][_index1] / _totals[state][_index1]) * 10
     if gradient > 0
         color = green_scale(gradient)
@@ -275,6 +281,8 @@ bring_to_top = (id_to_top) ->
     d3.selectAll('path').sort().order()
 
 show_map = (comparing) ->
+    $('#chart_controls').slideUp()
+    chart_group.selectAll('#okay_button').remove()
     chart_group.selectAll('g').remove()
     chart_group.selectAll('rect').remove()
     chart_group.selectAll('text').remove()
@@ -282,7 +290,9 @@ show_map = (comparing) ->
     $('#close').hide()
     d3.selectAll('.legend_label').remove()
     d3.selectAll('.bar_label').remove()
-    to_compare.length = 0 if not comparing
+    if not comparing
+        state_unhover(state) for state in to_compare
+        to_compare.length = 0 
     chart_x_scale = null
     regular_state_mode()
 
@@ -304,7 +314,7 @@ hide_tooltip = () ->
 
 legend_positions = (index) ->
     x = 125 * Math.floor(index/2) + 15
-    y = 25 * (index % 2) + 5
+    y = height + 25 * (index % 2) + 15 - 62
     [x, y]
 
 ensure_proper_size = () ->
@@ -312,18 +322,19 @@ ensure_proper_size = () ->
     for state_id in to_compare
         for label in labels
             bar = d3.select("##{state_id}_#{label}_bar")
-
             bar.attr('width', () ->
                 chart_x_scale(Math.abs(bar.data()))
             )
 
 highlight_bars = (focused) ->
-    console.log(focused)
-    ensure_proper_size()
+    ensure_proper_size() if !over_time
     labels = get_labels()
     for state_id in to_compare
         for label in labels
-            bar = d3.select("##{state_id}_#{label}_bar")
+            if over_time
+                bar = d3.select("##{label}_layer")
+            else
+                bar = d3.select("##{state_id}_#{label}_bar")
             box = d3.select("##{label}_box")
             text = d3.select("##{label}_label")
             d3.select('#veil').transition().duration(200)
@@ -345,7 +356,7 @@ highlight_bars = (focused) ->
 
 # shows all bars unless there are some focused, then only shows those
 unhighlight_bars = () ->
-    ensure_proper_size()
+    ensure_proper_size() if !over_time
     focused = get_focused()
     labels = get_labels()
     # some types are being focused
@@ -354,22 +365,26 @@ unhighlight_bars = () ->
     # if no energy types have been focused on
     else
         d3.select('#veil')
-            .transition().duration(700)
+            .transition().duration(200)
                 .attr('opacity', .75)
         d3.selectAll('.legend_box')
             .transition().duration(200)
                 .attr('opacity', 1)
-        d3.selectAll('.bar')
-            .transition().duration(150)
-                .attr('opacity', 1)
         d3.selectAll('.legend_label')
             .transition().duration(200)
+                .attr('opacity', 1)
+        if over_time
+            d3.selectAll('.layer')
+                .transition().duration(200)
+                    .attr('opacity', 1)
+        else        
+            d3.selectAll('.bar')
+                .transition().duration(150)
                 .attr('opacity', 1)
     
 update_bars = () ->
     if chart_x_scale?
         absolute = get_absolute()
-        console.log(absolute)
         x_scale = add_axis(absolute)
         chart_x_scale = x_scale
         # if chart_x_scale
@@ -394,10 +409,25 @@ update_bars = () ->
 
 toggle_controls = () ->
     controls = $('#controls')
+    button = $('#controls_toggle')
     if controls.is(':visible')
         controls.slideUp()
+        button.text('Show controls')
     else
         controls.slideDown()
+        button.text('Hide controls')
+        $('html,body').scrollTo(0, 600)
+
+toggle_sliders = () ->
+    equalizer = $('#equalizer')
+    button = $('#equalizer_toggle')
+    $('#please_click').slideUp()
+    if equalizer.is(':visible')
+        button.text("Show sliders")
+        equalizer.slideUp()
+    else
+        button.text("Hide sliders")
+        equalizer.slideDown()
 
 ###########################################
 #
@@ -405,9 +435,28 @@ toggle_controls = () ->
 #
 ###########################################
 
-setup_chart = () ->
-    console.log(to_compare)
+title_string = () ->
+    string = "Comparing Electricity Production of #{gon.state_names[ to_compare[0] ]}"
+    for i in [1...to_compare.length]
+        unless i == to_compare.length - 1
+            string += ", #{gon.state_names[ to_compare[i] ]}"
+        else
+            string += " and #{gon.state_names[ to_compare[i] ]}"
+    string += " in #{_max - _index1} "
 
+x_label = () ->
+    if get_absolute()
+        text = "Gigawatt-Hours Generated"
+    else
+        text = "Percentage of Total State Electricity Generated"
+    chart_group.append('text')
+        .attr('id', 'x_axis_label')
+        .style('text-anchor', 'middle')
+        .attr('x', width/2)
+        .attr('y', height - 80)
+        .text(text)
+
+setup_chart = () ->
     chart_group.append('rect')
         .attr('id', 'veil')
         .attr('width', width)
@@ -418,16 +467,25 @@ setup_chart = () ->
     chart_group.append('rect')
         .attr('id', 'top_stuff')
         .attr('width', width)
-        .attr('height', margins['top'])
+        .attr('height', margins['bottom']/1.6)
+        .attr('y', height - margins['bottom']/1.6)
         .attr('fill', 'white')
         .attr('opacity', 0.75)
 
     add_legend()
 
+    title(title_string())
+
     $('#controls').slideDown()
 
 add_legend = () ->
     index = 0
+    chart_group.append('text')
+        .style('text-anchor', 'middle')
+        .attr('x', width/2)
+        .attr('y', height - 55)
+        .text('Legend')
+
     for type, color of chart_colors
         positions = legend_positions(index)
         x = positions[0]
@@ -459,7 +517,6 @@ add_legend = () ->
             .attr('y', () -> y + 13 )
             .attr('font-size', () ->
                 smaller = ['pet_coke', 'pet_liquid', 'other_renew', 'other_gases']
-                # console.log(type)
                 if smaller.indexOf(this.id.slice(0, -6)) > -1
                     12
                 else
@@ -497,6 +554,7 @@ add_axis = (absolute) ->
 add_bars = () ->
     absolute = get_absolute()
     x_scale = add_axis(absolute)
+    x_label()
     chart_x_scale = x_scale
     for state_id in to_compare
         data = get_chart_data(state_id, absolute)
@@ -551,6 +609,15 @@ add_labels = () ->
             .attr('y', () -> bar_y("#{state_id}_bars") + 18 )
             .text("#{state_id}")
 
+title = (text) ->
+    d3.select('#chart_title').remove()
+    chart_group.append('text')
+        .attr('id', 'chart_title')
+        .style('text-anchor', 'middle')
+        .attr('x', width/2)
+        .attr('y', margins['top'] - 7)
+        .attr('font-size', 20)
+        .text(text)
 
 ###########################################
 #
@@ -577,8 +644,6 @@ get_chart_data = (state_id, absolute) ->
             if typeof series == typeof ""
                 numbers[numbers.length] = 0
             else
-                # console.log(type)
-                # console.log(series)
                 to_append = series[_index1][1]
                 to_append = 0 unless to_append # gets rid of undefined's
                 numbers[numbers.length] = to_append
@@ -613,7 +678,7 @@ bar_y = (bar_id) ->
         if g.id
             bar_num = num_bars if g.id == bar_id
             num_bars += 1
-    (height - margins['top']) * bar_num / num_bars
+    (height - margins['bottom']) * (bar_num / num_bars) #+ margins['top']
 
 focus_bars = (type) ->
     box = d3.select("##{type}_box")
@@ -632,8 +697,6 @@ get_absolute = () ->
     $('#scale_absolute').is(':checked')
 
 default_click = (id) ->
-    # console.log('default click')
-    # console.log(to_compare)
     to_compare[to_compare.length] = id
     make_chart()
 
@@ -673,6 +736,7 @@ regular_state_mode = () ->
         )
 
 bar_chart = () ->
+    $('#chart_controls').slideDown()
     add_states()
     add_bars()
     add_labels()
@@ -684,13 +748,19 @@ bar_chart = () ->
 # 3) add groups for each bar (make the attr the color the bar)
 # 4) add rects to the above groups
 make_chart = () ->
+    $('#make_chart').hide()
+    $('#compare').show()
     $('#close').show()
     setup_chart()
-    if over_time
-        streamgraph()
+    if to_compare.length
+        if over_time
+            streamgraph()
+        else
+            bar_chart()
     else
-        bar_chart()
-    regular_state_mode()
+        chart_group.append('text')
+            .style('text-anchor', 'middle')
+
 
 ###########################################
 #
@@ -700,7 +770,6 @@ make_chart = () ->
 
 streamgraph = () ->
     stack = d3.layout.stack()
-        .offset('wiggle')
         .values( (d) ->
             d.values
         )
@@ -708,7 +777,7 @@ streamgraph = () ->
     
     stream_x = d3.scale.linear()
         .domain([_min, _max])
-        .range([margins['left'], width - margins['right']])
+        .range([margins['left'] * 2, width - margins['right']])
     x_axis = d3.svg.axis()
         .scale(stream_x)
         .orient('bottom')
@@ -726,21 +795,30 @@ streamgraph = () ->
                 max_so_far = possible if possible > max_so_far
             max_so_far
         ), 0])
-        .range([margins['top'], height - margins['bottom']])
+        .range([margins['top'], height - margins['bottom'] - 5])
     y_axis = d3.svg.axis()
         .scale(stream_y)
         .orient('left')
     chart_group.append('g')
         .attr('class', 'axis')
-        .attr('transform', "translate(#{margins['left'] - 5}, 0)")
+        .attr('transform', "translate(#{margins['left'] * 2 - 5}, 0)")
         .call(y_axis)
+
     chart_group.append('text')
         .attr("transform", "rotate(-90)")
-        .attr('y', -margins['left'])
-        .attr('x', height/2 + 50)
+        .attr('y', -3)
+        .attr('x', -height/2 - margins['top'] * 1.25)
         .attr('dy', '1em')
         .attr('class', 'stream_y_label')
-        .text("Gigawatt-Hours")
+        .text("Gigawatt-Hours Generated")
+
+    title("Electricity History of #{gon.state_names[to_compare[0]]}")
+
+    chart_group.append('text')
+        .style('text-anchor', 'middle')
+        .attr('y', height - 80)
+        .attr('x', width/2)
+        .text("Year")
 
     area = d3.svg.area()
         .interpolate('cardinal')
@@ -755,22 +833,19 @@ streamgraph = () ->
             .attr('d', (d) -> area(d.values) )
             .attr('id', (d) -> "#{d.type}_layer" )
             .style('fill', (d) -> chart_colors[d.type] )
-
-    chart_group.selectAll('.layer')
-        .attr('opacity', 1)
-        .on('mouseover', (d, i) ->
-            d3.selectAll('#veil').transition().duration(200)
-                .attr('opacity', .9)
-            chart_group.selectAll('.layer').transition().duration(200)
-                .attr('opacity', (d, j) ->
-                    .3 if j != i
+            .attr('opacity', 0)
+            .transition().duration(300)
+                .delay( (d, i) ->
+                    i * 50
                 )
-        )
-        .on('mouseleave', () ->
-            d3.selectAll('#veil').transition().duration(200)
-                .attr('opacity', .75)
-            chart_group.selectAll('.layer').transition().duration(200)
                 .attr('opacity', 1)
+    chart_group.selectAll('.layer')
+        .on('mouseover', () ->
+            highlight_bars([this.id.slice(0, -6)])
+        )
+        .on('mouseleave', unhighlight_bars)
+        .on('click', () ->
+            focus_bars([this.id.slice(0, -6)])
         )
 
 
@@ -793,3 +868,30 @@ make_hash_series = (series) ->
             "x": i,
             "y": parseFloat(series[i][1])
         }
+
+#######################################
+#
+# Unused code (but might be usable later?)
+#
+#######################################
+
+# temporal_mode = () ->
+#     over_time = true
+#     $('#temporal_mode').hide()
+#     $('#static_mode').show()
+#     $('#time').slideUp()
+#     $('#year_compare').slideDown()
+#     values = $('#year_compare').slider('values')
+#     $('#year').text("#{values[0]} - #{values[1]}")
+#     _index1 = _max - values[0]
+#     _index2 = _max - values[1]
+#     d3.selectAll("##{state}").attr('fill', fill_color(state)) for state in gon.state_abbrevs
+
+# static_mode = () ->
+#     over_time = false
+#     $('#static_mode').hide()
+#     $('#temporal_mode').show()
+#     $('#year_compare').slideUp()
+#     $('#time').slideDown()
+#     $('#year').text("#{$('#time').slider('value')}")
+#     d3.selectAll("##{state}").attr('fill', fill_color(state)) for state in gon.state_abbrevs

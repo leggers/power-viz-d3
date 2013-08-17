@@ -15,6 +15,11 @@ div.tooltip {
   pointer-events: none;
 }
 
+button {
+  font-size: 17px;
+  font-family: sans-serif;
+}
+
 .axis path,
 .axis line {
   fill: none;
@@ -29,7 +34,11 @@ text {
 div.val_chooser {
   height: 200px;
   float: left;
-  border: 1px solid gray;
+  // border: 1px solid gray;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-bottom: 10px;
+  font-size: 15px;
 }
 
 body {
@@ -37,18 +46,6 @@ body {
   width: 960px;
   margin-right: auto;
   margin-left: auto;
-}
-
-#map_controls {
-  width: 480px;
-  // height: 50px;
-  float: left;
-}
-
-#chart_controls {
-  width: 480px;
-  // height: 50px;
-  float: left;
 }
 
 .bar_label {
@@ -72,4 +69,9 @@ text#controls {
 
 .stream_y_label {
   font-size: 16px;
+}
+
+#top_stuff {
+  stroke: black;
+  stroke-width: 1px;
 }

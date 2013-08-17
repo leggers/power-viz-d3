@@ -53,3 +53,7 @@ gem 'gon'
 # for seeding database
 gem 'rest-client'
 gem 'json'
+
+# gem 'anjlab-bootstrap-rails', :require => 'bootstrap-rails',
+                              # :github => 'anjlab/bootstrap-rails',
+                              # :branch => '3.0.0'

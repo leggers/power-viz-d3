@@ -1,13 +1,15 @@
 <center>
-	<h1>How green is our electricity?</h1>
+	<h1>Where does our electricity come from?</h1>
 </center>
 
 <body>
 	<div id="top_paragraph">
 		<p>
-			What charges our cell phones, laptops and electric vehicles?
+			What, exactly, charges our cell phones, laptops and electric vehicles?
 		</p>
-
+		<p>
+			<h3>What am I looking at?</h3>
+		</p>
 		<p>
 			Below is a map representing the "green-ness" of the electricity generated in each state of the US. The data were pulled from the beta API of the <%= link_to "Energy Information Agency", "http://www.eia.gov" %>. Packages used to make this were d3.js, jQuery and jQuery-ui.
 		</p>
@@ -21,6 +23,13 @@
 			http://www.thenewyorkworld.com/2013/07/25/city-liberates-map-data-trove/ (pushing for more open data is great to learn about practices)
 			person to reach out to: 
 		</p>
+		<p>
+			<h3>Show me more!</h3>
+			Click a state to see its electricity generation history shown graphically! If you want to compare states (to see who generates more coal power, for example), use the "Compare States" button, click the states you want to compare, and then click "Make Chart."
+		</p>
+		<p>
+			(Scroll down for caveats and other notes.)
+		</p>
 		
 	</div>
 
@@ -29,15 +38,14 @@
 			<%= render "map" %>
 		</div>
 
-		<span id="controls_toggle">Toggle Controls</span>
+		<button type="button" class="btn" id="controls_toggle">Play with the map</button>
 
 		<div id="controls">
+			<br>
 			<div id="map_controls">
-				<span id="replay">Replay State Fade-In</span>
-				<br>
-				<span id="compare">Compare States</span>
-				<span id="make_chart">Make Chart</span>
-				<br>
+				<button type="button" id="replay" class='btn'>Replay State Fade-In</button>
+				<button type="button" id="compare" class='btn'>Compare States</button>
+				<button type="button" id="make_chart" class='btn'>Make Chart</button type="button">
 				<!-- <span id="temporal_mode">See which states have gotten better or worse (changes with time)</span> -->
 				<!-- <span id="static_mode">See one point in time</span> -->
 			</div>
@@ -47,35 +55,35 @@
 					<%= label_tag(:scale_absolute, "Absolute") %>
 					<%= radio_button_tag(:scale, "relative") %>
 					<%= label_tag(:scale_relative, "Relative") %>
-					<span id="close"><br>Close Chart<br></span>
+					<button type="button" id="close">Close Chart</button>
 				<% end %>
-				<br>
+			</div>
+
+			<div>
+				<h2 id="year"></h2>
+				<div id="time" style="width: 200px;"></div>
+				<div id="year_compare" style="width: 200px;"></div>
+			</div>
+
+			<div id="weights">
+				<h2>Opinionated?</h2>
+				<button class="btn-large btn-success" type='button' id='equalizer_toggle'>Duh</button>
+				<h3 id='please_click'>Click the button to set your own "green-ness" scores for various types of power.</h3>
+				<div class='well' id='equalizer'>
+				  	<% for type, score in @green %>
+				  		<div class="val_chooser">
+							<div style="float: left;"><%= @translations[type] %>:</div>
+							<input type="number" style="width: 30px; border: none; background: transparent;" value="<%= score %>" id=<%= "#{type}_input" %>></input>
+							<div style="height:150px" id=<%= "#{type}_slider" %>></div>
+						</div>
+				  	<% end %>
+			  	</div>
 			</div>
 		</div>
-		<br>
-		<span>
-			<hr>
-			<h1 id="year"></h1>
-			<div id="time" style="width: 200px;"></div>
-			<div id="year_compare" style="width: 200px;"></div>
-		</span>
-
-		<div id="weights">
-			<h1>Opinionated?</h1>
-			<h3>Set your own "green-ness" scores for various types of power.</h3>
-			<div>
-			  	<% for type, score in @green %>
-			  		<% if type == :other_renew %>
-			  			</div>
-			  			<div>
-			  		<% end %>
-				  		<div class="val_chooser" style="background-color: <%=  %>">
-							<%= @translations[type] %>:
-							<div style="height:150px" id=<%= "#{type}_slider" %>></div>
-							<input type="number" style="width: 50px;" value="<%= score %>" id=<%= "#{type}_input" %>></input>
-						</div>
-			  	<% end %>
-		  	</div>
-		</div>
 	</center>
+	<h2>Caveats</h2>
+
+	<h2>Other Takeaways</h2>
+
+	<h2>Where next?</h2>
 </body>
