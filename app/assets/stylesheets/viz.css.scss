@@ -15,6 +15,14 @@ div.tooltip {
   pointer-events: none;
 }
 
+#first_words {
+  font-size: 20px;
+}
+
+#map_controls {
+  height: 50px;
+}
+
 button {
   font-size: 17px;
   font-family: sans-serif;
@@ -35,10 +43,11 @@ div.val_chooser {
   height: 200px;
   float: left;
   // border: 1px solid gray;
-  padding-left: 10px;
-  padding-right: 10px;
+  // padding-left: 10px;
+  // padding-right: 10px;
   padding-bottom: 10px;
   font-size: 15px;
+  width: 184px;
 }
 
 body {

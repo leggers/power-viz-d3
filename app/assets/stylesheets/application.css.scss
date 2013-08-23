@@ -11,5 +11,9 @@
  *= require_self
  */
 
+.well {
+	min-height: 615px;
+	height: 615px;
+}
 
 @import "bootstrap.min.css";
