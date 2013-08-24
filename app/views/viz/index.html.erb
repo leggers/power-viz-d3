@@ -55,13 +55,17 @@
 		</div>
 
 		<div id="chart_controls">
-			<%= form_tag do %>
-				<%= radio_button_tag(:scale, "absolute", value: true) %>
-				<%= label_tag(:scale_absolute, "Absolute (total number of gigawatt-hours generated)", id: 'scale_label') %>
-				<%= radio_button_tag(:scale, "relative") %>
-				<%= label_tag(:scale_relative, "Relative (proportion of each type of electricity)", id: 'scale_label') %>
-				<button type="button" id="close" class="btn btn-large">Close Chart</button>
-			<% end %>
+			<br>
+			<span class='first_words'>
+				Compare either the total electricity or the percentages of the total each state generates.
+			</span>
+				<%= form_tag do %>
+					<%= radio_button_tag(:scale, "absolute", value: true) %>
+					<%= label_tag(:scale_absolute, "Absolute (total number of gigawatt-hours generated)", id: 'scale_label') %>
+					<%= radio_button_tag(:scale, "relative") %>
+					<%= label_tag(:scale_relative, "Relative (proportion of each type of electricity)", id: 'scale_label') %>
+					<button type="button" id="close" class="btn btn-large btn-danger">Close Chart</button>
+				<% end %>
 		</div>
 
 		<p>

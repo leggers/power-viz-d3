@@ -285,6 +285,7 @@ show_map = function(comparing) {
   chart_x_scale = null;
   regular_state_mode();
   $('html').off('click', clicked_outside);
+  $('#chart_controls').slideUp();
   $('#close_chart').hide();
   $('#replay').show();
   return $('#year_selector').slideDown();
