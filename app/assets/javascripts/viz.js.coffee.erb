@@ -137,52 +137,13 @@ $ ->
     $('#equalizer').hide()
     $('#equalizer_toggle').on('click', toggle_sliders)
     $('#chart_controls').hide()
-
-    # $('#temporal_mode').hide()
-    # $('#temporal_mode').on('click', temporal_mode)
-    # $('#static_mode').hide()
-    # $('#static_mode').on('click', static_mode)
-
-    # to_compare = ['WA', 'FL', 'TX']
-    # make_chart()
-
-
-    # chart_group.append('rect')
-    #     .attr('id', 'veil')
-    #     .attr('width', width)
-    #     .attr('height', height)
-    #     .attr('fill', 'white')
-    #     .attr('opacity', '0.75')
-    #     .on('click', show_map)
-
-    # chart_group.append('text')
-    #     .style('text-anchor', 'middle')
-    #     .attr('x', width/2)
-    #     .attr('y', height/2)
-    #     .attr('font-size', 25)
-    #     .text("Click a state to see its electricity history")
-    #     .on('click', show_map)
-
-    # chart_group.append('foreignObject')
-    #     .on('click', show_map)
-    #     .attr('class', 'btn')
-    #     .attr('x', width/2 - 100)
-    #     .attr('y', height/2 + 20)
-    #     .attr('width', 200)
-    #     .attr('height', 40)
-    #     .attr('id', 'okay_button')
-
-    # chart_group.append('text')
-    #     .style('text-anchor', 'middle')
-    #     .attr('x', width/2)
-    #     .attr('y', height/2 + 45)
-    #     .text('Alrighty!')
-    #     .attr('font-size', 20)
-    #     .on('click', show_map)
+    $('#close_chart').hide()
 
     $('#explain').on('click', () ->
         d3.select('#explanation')
             .style('background', 'yellow')
+            .transition().duration(1500)
+                .style('background', 'white')
     )
 
 #######################################
@@ -291,13 +252,10 @@ bring_to_top = (id_to_top) ->
     d3.selectAll('path').sort().order()
 
 show_map = (comparing) ->
-    $('#chart_controls').slideUp()
-    chart_group.selectAll('#okay_button').remove()
     chart_group.selectAll('g').remove()
     chart_group.selectAll('rect').remove()
     chart_group.selectAll('text').remove()
     chart_group.selectAll('.layer').remove()
-    $('#close').hide()
     d3.selectAll('.legend_label').remove()
     d3.selectAll('.bar_label').remove()
     if not comparing
@@ -307,6 +265,9 @@ show_map = (comparing) ->
     chart_x_scale = null
     regular_state_mode()
     $('html').off('click', clicked_outside)
+    $('#close_chart').hide()
+    $('#replay').show()
+    $('#year_selector').slideDown()
 
 show_tooltip = () ->
     tooltip.transition()
@@ -722,7 +683,11 @@ get_absolute = () ->
     $('#scale_absolute').is(':checked')
 
 default_click = (id) ->
+    # make this hide the year slider and turn replay fade-in to close chart
     to_compare[to_compare.length] = id
+    $('#year_selector').slideUp()
+    $('#replay').hide()
+    $('#close_chart').show()
     make_chart()
 
 compare_click = (id) ->

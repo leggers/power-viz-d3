@@ -1,6 +1,6 @@
 <center>
 	<h1>Where does our electricity come from?</h1>
-	<h4>How green is the electricity that charges our cell phones, laptops and electric vehicles?</h4>
+	<h4>How green is the electricity that powers our cell phones, street lights and electric vehicles?</h4>
 </center>
 
 <body>
@@ -8,31 +8,38 @@
 		<h3>What am I looking at?</h3>
 	</p>
 	<p>
-		<span id='first_words'>Electrospection</span> is an interactive map that visualizes state-by-state electricity generation data.
+		<span class='first_words'>Electrospection</span> is an interactive map that visualizes state-by-state electricity generation data.
 		The first view represents the "green-ness" of the electricity generated in each state of the US.
 		A state is scored based on the number of megawatt-hours of each type of energy it generates.
 		Each type of power has its own score from -10 to 10 which multiplies the number of megawatt-hours generated; the total of these points evaluates to a final score.
 		If the score is positive, the state is colored green; if negative: red.
 	</p>
 	<p>
-		<span id='first_words'>Green-ness</span> is a somewhat subjective concept, as it requires evaluation of the myriad side-effects of electricity generation by a particular method.
-		For example: hydroelectric power dams release practically no greenhouse gasses (hooray!) <i>but</i> dams can prevent migratory fish like salmon from reaching their spawning grounds (boo) <b>however</b> fish ladders can be built to allow salmon to migrate.
+		<span class='first_words'>Green-ness</span> is a somewhat subjective concept, as it requires evaluation of the myriad side-effects of electricity generation by a particular method.
+		It is a source of debate among scientists.
+		For example: hydroelectric power dams release practically no greenhouse gasses <i>but</i> dams can prevent migratory fish like salmon from reaching their spawning grounds <b>however</b> fish ladders can be built to allow salmon to migrate.
 		Not all dams have fish ladders and not all dams block migrating salmon, further complicating the issue.
-		So, it seems like kind of a wash, but greenhouse gas emissions are more important to me than ensuring the utmost preservation of the salmon lifecycle, so I put the slider at +1.
-		Do some research about the individual facilities in your state and set the sliders to your beliefs!
+		My personal evaluation of the effects of hydroelectricity lead me to set the slider at +1.
+		Do some research about the individual facilities in your state and set the sliders below to your beliefs!
 		The map represents a rough concept of green-ness and values are changeable to your preference - play with the sliders below and see how the map changes.
 	</p>
 	<p>
-		<span id='first_words'>The data</span> were pulled from the beta API of the <%= link_to "Energy Information Agency", "http://www.eia.gov" %> (it is an incredible resource, if you know how to look). Packages used to make this were <%= link_to "d3.js", "http://www.d3js.org" %>, <%= link_to "Bootstrap", "http://www.getbootstrap.com" %>, <%= link_to "jQuery", "http://www.jquery.com" %>, <%= link_to "jQuery UI", "http://www.jqueryui.com" %> and a neat little jQuery plugin called scrollTo.
+		<span class='first_words'>The data</span> were pulled from the beta API of the <%= link_to "Energy Information Agency", "http://www.eia.gov" %> (it is an incredible resource, if you know how to look). Packages used to make this were <%= link_to "d3.js", "http://www.d3js.org" %>, <%= link_to "Bootstrap", "http://www.getbootstrap.com" %>, <%= link_to "jQuery", "http://www.jquery.com" %>, <%= link_to "jQuery UI", "http://www.jqueryui.com" %> and a neat little jQuery plugin called scrollTo.
 	</p>
 	<div id='explanation'>
 		<p>
-			<h3>Show me more!</h3>
-			<span id='first_words'>Click a state</span> to see its electricity generation history shown graphically.
-			If you want to compare states (to see who generates more coal power, for example), use the "Compare States" button, click the states you want to compare, and then click "Make Chart."
+			<h3>Get started</h3>
+			<span class='first_words'>Click a state</span> to see its electricity generation history shown graphically.
 		</p>
 		<p>
-			If you want to focus on certain power sources, click a corresponding element in any of the graphs and it will remain "hovered."
+			<span class='first_words'>To compare states</span> (to see who generates more coal power, for example), use the "Compare States" button, click the states you want to compare, and then click "Make Chart."
+		</p>
+		<p>
+			<span class='first_words'>To focus on certain power sources</span>, click a corresponding element in any of the graphs and it will remain "hovered."
+			Click again to defocus.
+		</p>
+		<p>
+			<span class='first_words'>Slide the year slider</span> when comparing states to see the data from that year!
 		</p>
 		<p>
 			(Scroll down for caveats and other notes.)
@@ -67,6 +74,7 @@
 
 		<div id="map_controls">
 			<button type="button" id="replay" class='btn btn-large btn-success' style="float: left;">Replay State Fade-In</button>
+			<button type='button' id='close_chart' class='btn btn-large btn-danger' style='float:left;'>Close Chart</button>
 			<button type="button" id="compare" class='btn btn-large btn-primary' style="float: right;">Compare States</button>
 			<button type="button" id="make_chart" class='btn btn-large btn-primary' style="float: right;">Make Chart</button type="button">
 			<!-- <span id="temporal_mode">See which states have gotten better or worse (changes with time)</span> -->
@@ -76,26 +84,39 @@
 		<div id="weights">
 			<h2>Opinionated? Set your own green-ness scores.</h2>
 			<!-- <h3 id='please_click'>Click the button to set your own "green-ness" scores for various types of power.</h3> -->
-			<button class="btn-large btn-success" type='button' id='equalizer_toggle' style="margin-bottom: 15px;">Duh</button>
-			<div class='well' id='equalizer' style='height: 615px;'>
-			  	<% for type, score in @green %>
-			  		<div class="val_chooser">
-						<div style="float: left;"><%= @translations[type] %>:</div>
-						<input type="number" style="width: 40px; border: none; background: transparent;" value="<%= score %>" id=<%= "#{type}_input" %>></input>
-						<div style="height:150px" id=<%= "#{type}_slider" %>></div>
-					</div>
-			  	<% end %>
-		  	</div>
+			<button class="btn-large btn-success" type='button' id='equalizer_toggle' style="margin-bottom: 15px;">Set my scores</button>
+			<div id='equalizer'>
+				<div id='suggestion' class='first_words'>
+					Try setting hydroelectric to +10 and coal to -10!
+				</div>
+				<div class='well' style='height: 615px;'>
+				  	<% for type, score in @green %>
+				  		<div class="val_chooser">
+							<div style="float: left;"><%= @translations[type] %>:</div>
+							<input type="number" style="width: 40px; border: none; background: transparent;" value="<%= score %>" id=<%= "#{type}_input" %>></input>
+							<div style="height:150px" id=<%= "#{type}_slider" %>></div>
+						</div>
+				  	<% end %>
+			  	</div>
+			  </div>
 		</div>
 
 	<br>
 	</center>
 	<h3>Caveats</h3>
 		<p>
-			This map doesn't take electricity sold <i>between</i> states because that data is not readily available. Each state's color and graphs are made from data about
+			This map doesn't take electricity sold <i>between</i> states because that data is not readily available.
+			Each state's color and graphs are made from data strictly about electricity generation.
 		</p>
 		<p>
-			TALK LATER about hydro_pumped energy. It's a compensatory measure states take to prevent using non-green power sources during peak hours HOWEVER it's often a net negative for states! Crazy.
+			An oddity in the data I noticed when making the graphs were instances of negative electricity generation by certain methods, most often pumped hydroelectric.
+			That is to say, states lost electricity by using pumped hydroelectric power to light streetlights, run air conditioning units, etc.
+		</p>
+		<p>
+			Why would any state do so?
+			Because pumped hydroelectricity is the best battery our current power grid can use.
+			The way pumped hydroelectricity works is that, during off-peak hours, states use excess electricity to pump water into a reservior above a dam.
+			Then, during peak hours, states use that water to generate electricity instead of turning on more dirty coal plants, for example; the slight loss in electricity is the price of keeping our atmosphere cleaner.
 		</p>
 	<h3>Other Takeaways</h3>
 		<p>

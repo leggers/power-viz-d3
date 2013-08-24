@@ -141,8 +141,9 @@ $(function() {
   $('#equalizer').hide();
   $('#equalizer_toggle').on('click', toggle_sliders);
   $('#chart_controls').hide();
+  $('#close_chart').hide();
   return $('#explain').on('click', function() {
-    return d3.select('#explanation').style('background', 'yellow');
+    return d3.select('#explanation').style('background', 'yellow').transition().duration(1500).style('background', 'white');
   });
 });
 
@@ -267,13 +268,10 @@ bring_to_top = function(id_to_top) {
 show_map = function(comparing) {
   var state, _i, _len;
 
-  $('#chart_controls').slideUp();
-  chart_group.selectAll('#okay_button').remove();
   chart_group.selectAll('g').remove();
   chart_group.selectAll('rect').remove();
   chart_group.selectAll('text').remove();
   chart_group.selectAll('.layer').remove();
-  $('#close').hide();
   d3.selectAll('.legend_label').remove();
   d3.selectAll('.bar_label').remove();
   if (!comparing) {
@@ -286,7 +284,10 @@ show_map = function(comparing) {
   }
   chart_x_scale = null;
   regular_state_mode();
-  return $('html').off('click', clicked_outside);
+  $('html').off('click', clicked_outside);
+  $('#close_chart').hide();
+  $('#replay').show();
+  return $('#year_selector').slideDown();
 };
 
 show_tooltip = function() {
@@ -743,6 +744,9 @@ get_absolute = function() {
 
 default_click = function(id) {
   to_compare[to_compare.length] = id;
+  $('#year_selector').slideUp();
+  $('#replay').hide();
+  $('#close_chart').show();
   return make_chart();
 };
 
