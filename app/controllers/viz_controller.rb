@@ -49,7 +49,7 @@ class VizController < ApplicationController
       :OH => 'Ohio', :OK => 'Oklahoma', :OR => 'Oregon', :PA => 'Pennsylvania',
       :RI => 'Rhode Island', :SC => 'South Carolina', :SD => 'South Dakota', :TN => 'Tennessee',
       :TX => 'Texas', :UT => 'Utah', :VA => 'Virginia', :VT => 'Vermont', :WI => 'Wisconsin',
-      :WV => 'West Virginia', :WY => 'Wyoming', :WA => 'Washington'
+      :WV => 'West Virginia', :WY => 'Wyoming', :WA => 'Washington', :USA => "the United States of America"
     }
 
     @pie_colors = {coal: "#000", pet_liquid: '#33401c', pet_coke: '#777', nat_gas: '#2c70ad',

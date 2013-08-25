@@ -83,24 +83,6 @@ $ ->
         })
     $('#year').text("Year: #{_max} (change with the slider below)")
 
-    # $('#year_compare').hide()
-    # $('#year_compare').slider({
-    #     animate: true,
-    #     orientation: "horizontal",
-    #     step: 1,
-    #     range: true,
-    #     max: _max,
-    #     min: _min,
-    #     step: 1,
-    #     values: [_max - 2, _max],
-    #     slide: (event, ui) ->
-    #         _index1 = _max - ui.values[0]
-    #         _index2 = _max - ui.values[1]
-    #         $('#year').text("#{ui.values[0]} - #{ui.values[1]}")
-    #         update_bars()
-    #         d3.selectAll("##{state}").attr('fill', fill_color(state)) for state in gon.state_abbrevs
-    #     })
-
     states_fade_in()
 
     d3.selectAll('.state')
@@ -138,6 +120,7 @@ $ ->
     $('#equalizer_toggle').on('click', toggle_sliders)
     $('#chart_controls').hide()
     $('#close_chart').hide()
+    $('#national').on('click', () -> default_click('USA'))
 
     $('#explain').on('click', () ->
         d3.select('#explanation')
@@ -258,10 +241,11 @@ show_map = (comparing) ->
     chart_group.selectAll('.layer').remove()
     d3.selectAll('.legend_label').remove()
     d3.selectAll('.bar_label').remove()
-    if not comparing
-        console.log('unovering every state')
+    if not comparing and to_compare[0] != 'USA'
         state_unhover(state) for state in to_compare
-        to_compare.length = 0 
+        to_compare.length = 0
+    if to_compare[0] == 'USA'
+        to_compare.length = 0
     chart_x_scale = null
     regular_state_mode()
     $('html').off('click', clicked_outside)
@@ -689,7 +673,8 @@ default_click = (id) ->
     $('#year_selector').slideUp()
     $('#replay').hide()
     $('#close_chart').show()
-    make_chart()
+    if id == 'USA' then national = true else national = false
+    make_chart(national)
 
 compare_click = (id) ->
     if to_compare.indexOf(id) == -1
@@ -734,7 +719,7 @@ bar_chart = () ->
 
 clicked_outside = (event) ->
     id = event.target.id
-    unless (rlayer.test(id) or rlabel.test(id) or rbox.test(id) or rbar.test(id) or rscale.test(id) or id.length == 2 or id == 'make_chart' or id == 'replay')
+    unless (rlayer.test(id) or rlabel.test(id) or rbox.test(id) or rbar.test(id) or rscale.test(id) or id.length == 2 or id == 'make_chart' or id == 'replay' or id == 'national')
         show_map()
 
 # steps:
@@ -742,14 +727,14 @@ clicked_outside = (event) ->
 # 2) add a group for the state, assign them data that will bring them to front (sort?)
 # 3) add groups for each bar (make the attr the color the bar)
 # 4) add rects to the above groups
-make_chart = () ->
+make_chart = (national) ->
     $('#make_chart').hide()
     $('#compare').show()
     $('#close').show()
     setup_chart()
-    if to_compare.length
+    if to_compare.length or national
         if over_time
-            streamgraph()
+            streamgraph(national)
         else
             $('#chart_controls').slideDown()
             bar_chart()
@@ -765,12 +750,12 @@ make_chart = () ->
 #
 ###########################################
 
-streamgraph = () ->
+streamgraph = (national) ->
     stack = d3.layout.stack()
         .values( (d) ->
-            d.values
+            d.values if d?
         )
-    layers = stack(stream_data())
+    layers = stack(stream_data(national))
     
     stream_x = d3.scale.linear()
         .domain([_min, _max])
@@ -845,17 +830,22 @@ streamgraph = () ->
             focus_bars([this.id.slice(0, -6)])
         )
 
-
-stream_data = () ->
-    time_series = gon.elec_data[to_compare[0]]
+stream_data = (national) ->
     layers = []
-    for type, series of time_series
-        unless typeof series == typeof "" or type == "hydro_pumped"
-            layers[layers.length] = {
-                "type": "#{type}",
-                "name": "#{translations[type]}"
-                "values": make_hash_series(series)
-            }
+    if !national
+        time_series = gon.elec_data[to_compare[0]]
+        for type, series of time_series
+            unless typeof series == typeof "" or type == "hydro_pumped"
+                layers[layers.length] = {
+                    "type": "#{type}",
+                    "name": "#{translations[type]}"
+                    "values": make_hash_series(series)
+                }
+    else
+        layers = initialize_layers()
+        console.log(layers)
+        for state, time_series of gon.elec_data
+            add_to_layers(layers, time_series)
     layers    
 
 make_hash_series = (series) ->
@@ -865,6 +855,37 @@ make_hash_series = (series) ->
             "x": i,
             "y": parseFloat(series[i][1])
         }
+
+empty_hash_series = () ->
+    hashed = []
+    for i in [0.._max - _min]
+        hashed[hashed.length] = {
+            "x": i,
+            "y": 0
+        }
+
+add_to_series = (series, hash) ->
+    for i in [0...series.length]
+        hash[i]["y"] += parseFloat(series[i][1])
+
+initialize_layers = () ->
+    layers = []
+    for type, translation of translations
+        unless type == "hydro_pumped"
+            layers[layers.length] = {
+                "type": "#{type}",
+                "name": "#{translation}"
+                "values": empty_hash_series()
+            }
+    layers
+
+add_to_layers = (layers, time_series) ->
+    for type, series of time_series
+        unless type == "hydro_pumped" or typeof series == typeof ""
+            for layer in layers
+                if layer?
+                    if type == layer['type']
+                        add_to_series(series, layer["values"])
 
 #######################################
 #
