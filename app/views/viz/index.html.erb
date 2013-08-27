@@ -3,52 +3,21 @@
 	<h4>How green is the electricity that powers our cell phones, street lights and electric vehicles?</h4>
 </center>
 
+
 <body>
-	<p>
-		<h3>What am I looking at?</h3>
-	</p>
-	<p>
-		<span class='first_words'>Electrospection</span> is an interactive map that visualizes state-by-state electricity generation data.
-		The first view represents the "green-ness" of the electricity generated in each state of the US.
-		A state is scored based on the number of megawatt-hours of each type of energy it generates.
-		Each type of power has its own score from -10 to 10 which multiplies the number of megawatt-hours generated; the total of these points evaluates to a final score.
-		If the score is positive, the state is colored green; if negative: red.
-	</p>
-	<p>
-		<span class='first_words'>Green-ness</span> is a somewhat subjective concept, as it requires evaluation of the myriad side-effects of electricity generation by a particular method.
-		It is a source of debate among scientists.
-		For example: hydroelectric power dams release practically no greenhouse gasses <i>but</i> dams can prevent migratory fish like salmon from reaching their spawning grounds <b>however</b> fish ladders can be built to allow salmon to migrate.
-		Not all dams have fish ladders and not all dams block migrating salmon, further complicating the issue.
-		My personal evaluation of the effects of hydroelectricity lead me to set the slider at +1.
-		Do some research about the individual facilities in your state and set the sliders below to your beliefs!
-		The map represents a rough concept of green-ness and values are changeable to your preference - play with the sliders below and see how the map changes.
-	</p>
-	<p>
-		<span class='first_words'>The data</span> were pulled from the beta API of the <%= link_to "Energy Information Agency", "http://www.eia.gov" %> (it is an incredible resource, if you know how to look). Packages used to make this were <%= link_to "d3.js", "http://www.d3js.org" %>, <%= link_to "Bootstrap", "http://www.getbootstrap.com" %>, <%= link_to "jQuery", "http://www.jquery.com" %>, <%= link_to "jQuery UI", "http://www.jqueryui.com" %> and a neat little jQuery plugin called scrollTo.
-	</p>
+
 	<div id='explanation'>
 		<p>
-			<h3>Get started</h3>
 			<span class='first_words'>Voice your opinion</span> by clicking "Set my scores" and adjusting the sliders according to your views on various sources of electricity.
 		</p>
 		<p>
 			<span class='first_words'>Click a state</span> to see its electricity generation history shown graphically.
 		</p>
 		<p>
-			<span class='first_words'>To compare states</span> (to see who generates more coal power, for example), use the "Compare States" button, click the states you want to compare, and then click "Make Chart."
-		</p>
-		<p>
-			<span class='first_words'>To focus on certain power sources</span>, click a corresponding element in any of the graphs and it will remain "hovered."
-			Click again to defocus.
-		</p>
-		<p>
-			<span class='first_words'>Slide the year slider</span> when comparing states to see the data from that year!
-		</p>
-		<p>
-			(Scroll down for caveats and other notes.)
+			<span class='first_words'>Compare states</span> (to see who generates more coal power, for example), by clicking the "Compare States" button, selecting the states you want to compare, and then clicking "Make Chart."
 		</p>
 	</div>
-		
+
 	<center>
 		<div id="weights">
 			<h2>Opinionated? Set your own green-ness scores.</h2>
@@ -71,8 +40,8 @@
 			  	</div>
 			  </div>
 		</div>
-
 		<br>
+
 		<div id='map'>
 			<%= render "map" %>
 		</div>
@@ -90,14 +59,14 @@
 					<button type="button" id="close" class="btn btn-large btn-danger">Close Chart</button>
 				<% end %>
 		</div>
+		<br>
 
-		<p>
 			<div id='year_selector'>
 				<h2 id="year"></h2>
 				<div id="time" style="width: 200px;"></div>
 				<div id="year_compare" style="width: 200px;"></div>
 			</div>
-		</p>
+		<br>
 
 		<div id="map_controls">
 			<button type="button" id="compare" class='btn btn-large btn-primary' style="float: left;">Compare states</button>
@@ -111,6 +80,28 @@
 
 	<br>
 	</center>
+		<p>
+		<h3>What am I looking at?</h3>
+	</p>
+	<p>
+		<span class='first_words'>Electrospection</span> is an interactive map that visualizes state-by-state electricity generation data.
+		The first view represents the "green-ness" of the electricity generated in each state of the US.
+		A state is scored based on the number of megawatt-hours of each type of energy it generates.
+		Each type of power has its own score from -10 to 10 which multiplies the number of megawatt-hours generated; the total of these points evaluates to a final score.
+		If the score is positive, the state is colored green; if negative: red.
+	</p>
+	<p>
+		<span class='first_words'>Green-ness</span> is a somewhat subjective concept, as it requires evaluation of the myriad side-effects of electricity generation by a particular method.
+		It is a source of debate among scientists.
+		For example: hydroelectric power dams release practically no greenhouse gasses <i>but</i> dams can prevent migratory fish like salmon from reaching their spawning grounds <b>however</b> fish ladders can be built to allow salmon to migrate.
+		Not all dams have fish ladders and not all dams block migrating salmon, further complicating the issue.
+		My personal evaluation of the effects of hydroelectricity lead me to set the slider at +1.
+		Do some research about the individual facilities in your state and set the sliders below to your beliefs!
+		The map represents a rough concept of green-ness and values are changeable to your preference - play with the sliders below and see how the map changes.
+	</p>
+	<p>
+		<span class='first_words'>The data</span> were pulled from the beta API of the <%= link_to "Energy Information Agency", "http://www.eia.gov", :target => '_blank' %> (it is an incredible resource, if you know how to look). Packages used to make this were <%= link_to "d3.js", "http://www.d3js.org", :target => '_blank' %>, <%= link_to "Bootstrap", "http://www.getbootstrap.com", :target => '_blank' %>, <%= link_to "jQuery", "http://www.jquery.com", :target => '_blank' %>, <%= link_to "jQuery UI", "http://www.jqueryui.com", :target => '_blank' %> and a neat little jQuery plugin called scrollTo.
+	</p>
 	<h3>Caveats</h3>
 		<p>
 			This map doesn't take electricity sold <i>between</i> states because that data is not readily available.
@@ -127,29 +118,42 @@
 			Then, during peak hours, states use that water to generate electricity instead of turning on more dirty coal plants, for example; the slight loss in electricity is the price of keeping our atmosphere cleaner.
 			(I removed pumped hydroelectricity from the electricity history graphs becuase it was mucking things up.)
 		</p>
+	<h3>Further Education</h3>
+		<p>
+			Wikipedia and Google are excellent resources for better understanding natural resource extraction methods and how said resources are used in electricity generation.
+			Use them to answer questions like "How does my state make nuclear power?"
+		</p>
+		<p>
+			The Atlantic has an <%= link_to "excellent series of videos and articles", 'http://www.theatlantic.com/special-report/users-guide-energy', :target => '_blank' %> on energy (not electricity) is consumed in the US.
+		</p>
+		<p>
+			The New York Times has a <%= link_to "great piece", 'http://www.nytimes.com/2013/08/15/business/energy-environment/intermittent-nature-of-green-power-is-challenge-for-utilities.html?pagewanted=2&_r=1&hp&', :target => '_blank' %> about a wind farm in Vermont that offers a window into the politics surrounding our grid and green energy.
+		</p>
+		<p>
+			Here's a blog post from Scientifid American on <%= link_to "why fracking might not be so great", 'http://www.scientificamerican.com/article.cfm?id=groundwater-contamination-may-end-the-gas-fracking-boom', :target => '_blank' %>.
+		</p>
 	<h3>Other Takeaways</h3>
 		<p>
 			The availability of data is essential to understanding the world around us and making invisible structures visible.
-			Make more data available- that's the real definition of transparency.
-			Stuff like this is awesome: http://www.codeforamerica.org/2013/07/25/epic-win-for-nycs-open-data-community-pluto-is-free/
+			That sentiment holds true in all aspects of our lives: understanding government, understanding privelege (the true buzzword of 2013) and even understanding our bodies (we have very little data on how exactly our digestive tract interacts with the food we eat, for example).
+			The true definition of transparency is availability of data; aiding knowledge.
+			Stuff like <%= link_to 'New York City making PLUTO free', 'http://www.codeforamerica.org/2013/07/25/epic-win-for-nycs-open-data-community-pluto-is-free/', :target => '_blank' %> is awesome.
+			More stuff like that should happen.
 		</p>
-	<h3>Further Education</h3>
 		<p>
-			stuff to ackowledge: http://www.theatlantic.com/special-report/users-guide-energy (can put that data on this map, too)
-			http://www.nytimes.com/2013/08/15/business/energy-environment/intermittent-nature-of-green-power-is-challenge-for-utilities.html?pagewanted=2&_r=1&hp&
-			http://www.thenewyorkworld.com/2013/07/25/city-liberates-map-data-trove/ (pushing for more open data is great to learn about practices)
-			person to reach out to: 
-
+			This is not a complete picture at all!
+			A lot of guesswork went into picking the data to visualize and much data remains difficult to use.
+			Policy wonks, politicians and preachers can all agree that knowledge is power, so let's (this needs to go somewhere)
 		</p>
 	<h3>Where next?</h3>
 		<p>
-			I would for this to eventually be transformed into a vizualizer for all of the EIA's data (and data from other sources, too).
+			I would love for this to eventually be transformed into a vizualizer for all of the EIA's data (and data from other sources, too).
 			It's possible to put energy consumption data in the map, though the graphs per-state would need to be a little more complicated to properly show how energy use breaks down per-use (transportation, electricity, heating, etc.).
 		</p>
 		<center>
 			<button type="button" id="explain" class='btn btn-large btn-info' style="margin-bottom: 50px;">Wait, so, what do I do?</button>
 		</center>
-		<br>
-		<br>
 		Copyright 2013 Lucas Eggers
+		<br>
+		<a href="mailto:electrospection@gmail.com" class='btn btn-primary'>Get in touch</a>
 </body>

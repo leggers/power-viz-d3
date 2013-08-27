@@ -9,8 +9,7 @@
 #
 #######################################
 
-green_scale = d3.scale.linear().domain([0,10]).range(['grey', 'green'])
-red_scale = d3.scale.linear().domain([0,10]).range(['grey', 'red'])
+color_scale = d3.scale.linear().domain([-10, 0,10]).range(['red', 'grey', 'green'])
 _scores = {}
 _percentages = {}
 _totals = {}
@@ -129,10 +128,10 @@ $ ->
     $('#share').on('click', share_opinion)
 
     $('#explain').on('click', () ->
-        $.scrollTo(0, 400)
+        $.scrollTo(0, 0)
         d3.select('#explanation')
             .style('background', 'yellow')
-            .transition().duration(1500)
+            .transition().duration(2000)
                 .style('background', 'white')
     )
 
@@ -164,7 +163,7 @@ calculate_scores = (state) ->
                             totals[i] = 0
                         toAdd = gon.green[k]*gigawatts
                         scores[i] += toAdd
-                        totals[i] += gigawatts
+                        totals[i] += Math.abs(toAdd)
     _scores[state] = scores
     _totals[state] = totals
 
@@ -229,11 +228,8 @@ change_green_val = (type, value) ->
 
 fill_color = (state) ->
     gradient = (_scores[state][_index1] / _totals[state][_index1]) * 10
-    if gradient > 0
-        color = green_scale(gradient)
-    else
-        color = red_scale(-gradient)
-    return color
+    console.log(gradient)
+    return color_scale(gradient)
 
 bring_to_top = (id_to_top) ->
     d3.selectAll('path').datum(-1)
@@ -396,7 +392,7 @@ toggle_sliders = () ->
     else
         button.text("Hide sliders")
         equalizer.slideDown()
-        $('body').scrollTo(0, 450)
+        $('body').scrollTo(0, 280)
 
 ###########################################
 #
@@ -568,9 +564,9 @@ add_bars = () ->
                 # .on('mousemove', (d, i) ->
                 #     tooltip_says("#{translations[labels[i]]}: #{Math.round(d)}")
                 # )
-                .on('click', () ->
-                    focus_bars(this.id.slice(3, -4))
-                )
+                # .on('click', () ->
+                #     focus_bars(this.id.slice(3, -4))
+                # )
                 .on('mouseleave', unhighlight_bars)
                 .transition().duration(500)
                     .delay( (d, i) ->
@@ -835,9 +831,9 @@ streamgraph = (national) ->
             highlight_bars([this.id.slice(0, -6)])
         )
         .on('mouseleave', unhighlight_bars)
-        .on('click', () ->
-            focus_bars([this.id.slice(0, -6)])
-        )
+        # .on('click', () ->
+        #     focus_bars([this.id.slice(0, -6)])
+        # )
 
 stream_data = (national) ->
     layers = []
