@@ -54,6 +54,8 @@ gem 'gon'
 gem 'rest-client'
 gem 'json'
 
+gem 'puma'
+
 # gem 'anjlab-bootstrap-rails', :require => 'bootstrap-rails',
                               # :github => 'anjlab/bootstrap-rails',
                               # :branch => '3.0.0'

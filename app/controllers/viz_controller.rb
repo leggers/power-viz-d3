@@ -78,4 +78,9 @@ class VizController < ApplicationController
     gon.translations = @translations
     gon.state_names = @state_names
   end
+
+  def submit_scores
+    
+  end
+
 end
