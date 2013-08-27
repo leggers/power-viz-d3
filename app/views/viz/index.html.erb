@@ -29,6 +29,9 @@
 	<div id='explanation'>
 		<p>
 			<h3>Get started</h3>
+			<span class='first_words'>Voice your opinion</span> by clicking "Set my scores" and adjusting the sliders according to your views on various sources of electricity.
+		</p>
+		<p>
 			<span class='first_words'>Click a state</span> to see its electricity generation history shown graphically.
 		</p>
 		<p>
@@ -46,46 +49,7 @@
 		</p>
 	</div>
 		
-
 	<center>
-		<button type="button" id="explain" class='btn btn-large btn-info' style="margin-bottom: 50px;">Wait, so, what do I do?</button>
-		<br>
-		<div id='map'>
-			<%= render "map" %>
-		</div>
-
-		<div id="chart_controls">
-			<br>
-			<span class='first_words'>
-				Compare either the total electricity or the percentages of the total each state generates.
-			</span>
-				<%= form_tag do %>
-					<%= radio_button_tag(:scale, "absolute", value: true) %>
-					<%= label_tag(:scale_absolute, "Absolute (total number of gigawatt-hours generated)", id: 'scale_label') %>
-					<%= radio_button_tag(:scale, "relative") %>
-					<%= label_tag(:scale_relative, "Relative (proportion of each type of electricity)", id: 'scale_label') %>
-					<button type="button" id="close" class="btn btn-large btn-danger">Close Chart</button>
-				<% end %>
-		</div>
-
-		<p>
-			<div id='year_selector'>
-				<h2 id="year"></h2>
-				<div id="time" style="width: 200px;"></div>
-				<div id="year_compare" style="width: 200px;"></div>
-			</div>
-		</p>
-
-		<div id="map_controls">
-			<button type="button" id="replay" class='btn btn-large btn-success' style="float: left;">Replay state fade-in</button>
-			<button type='button' id='close_chart' class='btn btn-large btn-danger' style='float:left;'>Close chart</button>
-			<button id='national' class='btn btn-large btn-inverse'>See history for the entire nation</button>
-			<button type="button" id="compare" class='btn btn-large btn-primary' style="float: right;">Compare states</button>
-			<button type="button" id="make_chart" class='btn btn-large btn-primary' style="float: right;">Make chart</button type="button">
-			<!-- <span id="temporal_mode">See which states have gotten better or worse (changes with time)</span> -->
-			<!-- <span id="static_mode">See one point in time</span> -->
-		</div>
-
 		<div id="weights">
 			<h2>Opinionated? Set your own green-ness scores.</h2>
 			<!-- <h3 id='please_click'>Click the button to set your own "green-ness" scores for various types of power.</h3> -->
@@ -102,8 +66,47 @@
 							<div style="height:150px" id=<%= "#{type}_slider" %>></div>
 						</div>
 				  	<% end %>
+				  	<!-- <button type='button' class='btn btn-large btn-success' id='share'>Share my opinion</button> -->
+				  	<div id='share_text'></div>
 			  	</div>
 			  </div>
+		</div>
+
+		<br>
+		<div id='map'>
+			<%= render "map" %>
+		</div>
+
+		<div id="chart_controls">
+			<br>
+			<span class='first_words'>
+				Compare either the total electricity or the percentages of the total each state generates.
+			</span>
+				<%= form_tag do %>
+					<%= radio_button_tag(:scale, "absolute", value: true) %>
+					<%= label_tag(:scale_absolute, "Absolute (total number of gigawatt-hours generated)", id: 'scale_label') %>
+					<%= radio_button_tag(:scale, "relative") %>
+					<%= label_tag(:scale_relative, "Proportional (percentage of each type of electricity)", id: 'scale_label') %>
+					<button type="button" id="close" class="btn btn-large btn-danger">Close Chart</button>
+				<% end %>
+		</div>
+
+		<p>
+			<div id='year_selector'>
+				<h2 id="year"></h2>
+				<div id="time" style="width: 200px;"></div>
+				<div id="year_compare" style="width: 200px;"></div>
+			</div>
+		</p>
+
+		<div id="map_controls">
+			<button type="button" id="compare" class='btn btn-large btn-primary' style="float: left;">Compare states</button>
+			<button type="button" id="make_chart" class='btn btn-large btn-primary' style="float: left;">Make chart</button type="button">
+			<button type="button" id="replay" class='btn btn-large btn-warning' style="float: right;">Reset Map</button>
+			<button type='button' id='close_chart' class='btn btn-large btn-danger' style='float:right;'>Close chart</button>
+			<button id='national' class='btn btn-large btn-inverse'>See history for the entire nation</button>
+			<!-- <span id="temporal_mode">See which states have gotten better or worse (changes with time)</span> -->
+			<!-- <span id="static_mode">See one point in time</span> -->
 		</div>
 
 	<br>
@@ -143,6 +146,9 @@
 			I would for this to eventually be transformed into a vizualizer for all of the EIA's data (and data from other sources, too).
 			It's possible to put energy consumption data in the map, though the graphs per-state would need to be a little more complicated to properly show how energy use breaks down per-use (transportation, electricity, heating, etc.).
 		</p>
+		<center>
+			<button type="button" id="explain" class='btn btn-large btn-info' style="margin-bottom: 50px;">Wait, so, what do I do?</button>
+		</center>
 		<br>
 		<br>
 		Copyright 2013 Lucas Eggers

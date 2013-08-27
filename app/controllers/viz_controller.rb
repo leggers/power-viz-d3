@@ -6,11 +6,26 @@ class VizController < ApplicationController
       'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT',
       'VA', 'VT', 'WI', 'WV', 'WY', 'WA'
     ]
+
     @green = {
       coal: -1, nat_gas: -1, nuclear: 1, hydro: 1,wind: 1, solar: 1, geo: 1, biomass: 1,
       wood: 1, hydro_pumped: 0, pet_liquid: -1, pet_coke: -1, other_gases: 0, other: 0
       #, other_renew: 1
     }
+    gon.defaults = @green.clone
+
+    changes = JSON.parse(params['green']) if params['green']
+
+    if changes
+      @green.each do |entry| 
+        if changes.has_key?(entry[0].to_s)
+          @green[entry[0]] = changes[entry[0].to_s]
+        end
+      end
+    end
+
+    p @green
+
     gon.green = @green
     gon.state_abbrevs = @state_abbrevs
 
@@ -32,7 +47,7 @@ class VizController < ApplicationController
       coal: "Coal", pet_liquid: "Petroleum Liquid", pet_coke: "Petroleum Coke",
       nat_gas: "Natural Gas", other_gases: "Other Gasses", nuclear: "Nuclear",
       hydro: "Hydroelectric", wind: "Wind", solar: "Solar", wood: "Wood",
-      geo: "Geothermal", biomass: "Biomass", hydro_pumped: "Pumped Hydroelectric",
+      geo: "Geothermal", biomass: "Biomass", hydro_pumped: "Pumped Hydro",
       other: "Other"
     # , other_renew: "Other Renewables"
     }

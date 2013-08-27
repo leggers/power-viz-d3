@@ -62,6 +62,7 @@ $ ->
             value: weight,
             slide: (event, ui) ->
                 change_green_val(ui.handle.parentElement.id.slice(0, -7), ui.value)
+                share_opinion()
             })
         $("##{type}_input").on('change', (eventObject) ->
             change_green_val(this.id.slice(0, -6), this.value)
@@ -120,9 +121,15 @@ $ ->
     $('#equalizer_toggle').on('click', toggle_sliders)
     $('#chart_controls').hide()
     $('#close_chart').hide()
-    $('#national').on('click', () -> default_click('USA'))
+    $('#national').on('click', () ->
+        show_map(false)
+        $('#national').hide()
+        default_click('USA')
+    )
+    $('#share').on('click', share_opinion)
 
     $('#explain').on('click', () ->
+        $.scrollTo(0, 400)
         d3.select('#explanation')
             .style('background', 'yellow')
             .transition().duration(1500)
@@ -242,6 +249,7 @@ show_map = (comparing) ->
     d3.selectAll('.legend_label').remove()
     d3.selectAll('.bar_label').remove()
     if not comparing and to_compare[0] != 'USA'
+        d3.selectAll('.state').datum(1)
         state_unhover(state) for state in to_compare
         to_compare.length = 0
     if to_compare[0] == 'USA'
@@ -253,6 +261,7 @@ show_map = (comparing) ->
     $('#close_chart').hide()
     $('#replay').show()
     $('#year_selector').slideDown()
+    $('#national').show()
 
 show_tooltip = () ->
     tooltip.transition()
@@ -350,11 +359,6 @@ update_bars = (change_scale) ->
             chart_x_scale = x_scale
         else
             x_scale = chart_x_scale
-        # if chart_x_scale
-        #     console.log(x_scale.domain())
-        #     console.log(chart_x_scale.domain())
-        #     if x_scale.domain()[1] > chart_x_scale.domain()[1]
-        #         chart_x_scale.domain(x_scale.domain())
         for state_id in to_compare
             data = get_chart_data(state_id, absolute)
             labels = data[0]
@@ -389,19 +393,24 @@ toggle_sliders = () ->
     if equalizer.is(':visible')
         button.text("Show sliders")
         equalizer.slideUp()
-        year.slideDown()
-        controls.slideDown()
     else
         button.text("Hide sliders")
         equalizer.slideDown()
-        year.slideUp()
-        controls.slideUp()
+        $('body').scrollTo(0, 450)
 
 ###########################################
 #
 # Visual Setup (the placing of things)
 #
 ###########################################
+
+share_opinion = () ->
+    text_loc = $('#share_text')
+    text_loc.empty()
+    suffix = ""
+    for type, value of gon.green
+        suffix += '"' + type + '": ' + value + ", " if value != gon.defaults[type]
+    text_loc.append("<span class='first_words'>Share your opinion:</span> electrospection.com/?green={#{suffix.slice(0, -2)}}")
 
 title_string = () ->
     string = "Comparing Electricity Production of #{gon.state_names[ to_compare[0] ]}"
