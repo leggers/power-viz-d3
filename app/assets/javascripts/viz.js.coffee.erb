@@ -22,7 +22,7 @@ width = 959
 height = 593
 chart_colors = undefined
 chart_group = undefined
-tooltip = undefined
+tooltips = []
 translations = undefined
 to_compare = []
 chart_x_scale = undefined
@@ -95,10 +95,6 @@ $ ->
         .on('click', () ->
             default_click(this.id)
         )
-
-    tooltip = d3.select('body').append('div')
-        .attr('class', 'tooltip')
-        .style('opacity', 0)
 
     d3.select('body')
         .on('keydown', () ->
@@ -228,7 +224,6 @@ change_green_val = (type, value) ->
 
 fill_color = (state) ->
     gradient = (_scores[state][_index1] / _totals[state][_index1]) * 10
-    console.log(gradient)
     return color_scale(gradient)
 
 bring_to_top = (id_to_top) ->
@@ -258,6 +253,19 @@ show_map = (comparing) ->
     $('#replay').show()
     $('#year_selector').slideDown()
     $('#national').show()
+
+add_tooltip = (bar) ->
+    rect = bar[0][0]
+    offest = ($(window).width() - width)/2
+    tooltip = d3.select('body').append('div')
+        .attr('class', 'tooltip')
+        .style('opacity', 1)
+        .style('left', "#{rect.x.baseVal.value + offest + rect.width.baseVal.value/2 - 47}px")
+        .style('top', "#{rect.y.baseVal.value + 350}px")
+        .text("#{Math.round(bar.datum())} GW-hrs")
+
+remove_tooltips = () ->
+    d3.selectAll('.tooltip').remove()
 
 show_tooltip = () ->
     tooltip.transition()
@@ -303,6 +311,7 @@ highlight_bars = (focused) ->
             d3.select('#veil').transition().duration(200)
                 .attr('opacity', .95)
             if focused.indexOf(label) > -1
+                add_tooltip(bar) if !over_time
                 bar.transition().duration(150)
                     .attr('opacity', 1)
                 box.transition().duration(200)
@@ -319,6 +328,7 @@ highlight_bars = (focused) ->
 
 # shows all bars unless there are some focused, then only shows those
 unhighlight_bars = () ->
+    remove_tooltips()
     ensure_proper_size() if !over_time
     focused = get_focused()
     labels = get_labels()
@@ -848,7 +858,6 @@ stream_data = (national) ->
                 }
     else
         layers = initialize_layers()
-        console.log(layers)
         for state, time_series of gon.elec_data
             add_to_layers(layers, time_series)
     layers    
