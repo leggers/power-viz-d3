@@ -143,6 +143,7 @@ $(function() {
   });
   $('#equalizer').hide();
   $('#equalizer_toggle').on('click', toggle_sliders);
+  $('#eq_link').on('click', toggle_sliders);
   $('#chart_controls').hide();
   $('#close_chart').hide();
   $('#national').on('click', function() {
@@ -508,7 +509,7 @@ explain = function() {
 };
 
 share_opinion = function() {
-  var suffix, text_loc, type, value, _ref;
+  var link, suffix, text_loc, type, value, _ref;
 
   $('#share').hide();
   text_loc = $('#share_text');
@@ -523,7 +524,8 @@ share_opinion = function() {
     }
   }
   $.post("/submit_scores?green={" + (suffix.slice(0, -2)) + "}");
-  return text_loc.append("<span class='first_words'>Share Link:</span> electrospection.com/?green={" + (suffix.slice(0, -2)) + "}");
+  link = "http://www.electrospection.com/?green={" + (suffix.slice(0, -2)) + "}";
+  return text_loc.append("<span class='first_words'>Copy-paste to share:</span> <a href=\"" + link + "\" target='_blank'>" + link + "</a>");
 };
 
 title_string = function() {

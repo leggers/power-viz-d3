@@ -1,19 +1,19 @@
 <center>
 	<h1>Where does our electricity come from?</h1>
-	<h4>How green is the electricity that powers our cell phones, street lights and electric vehicles?</h4>
+	<h4>How green is the electricity that powers your cell phones, street lights and electric vehicles?</h4>
 </center>
 
 <body>
 
 	<div id='explanation'>
 		<p>
-			<span class='first_words'>Voice your opinion</span> by clicking "Set my scores" and adjusting the sliders according to your views on the environmental impacts of various sources of electricity.
+			<span class='first_words'>Voice your opinion</span> by clicking <%= link_to "What's \"grenness?\"", '#', id: 'eq_link' %>  and adjusting the sliders according to your views on the environmental impacts of various sources of electricity.
 		</p>
 		<p>
 			<span class='first_words'>Click a state</span> to see its electricity generation history shown graphically.
 		</p>
 		<p>
-			<span class='first_words'>Compare states</span> (to see who generates more coal power, for example), by clicking the "Compare States" button, selecting the states you want to compare, and then clicking "Make Chart."
+			<span class='first_words'>Compare states</span> by clicking the "Compare States" button, selecting the states you want to compare, and then clicking "Make Chart" (to see who generates more coal power, for instance).
 		</p>
 		<p>
 			<span class='first_words'>Zoom in</span> if you want bigger charts.</span>
@@ -38,9 +38,9 @@
 						</div>
 				  	<% end %>
 				  	<button type='button' class='btn btn-large btn-success' id='share'>Share my opinion</button>
-				  	<div id='share_text'></div>
 			  	</div>
 			  </div>
+			  <div id='share_text'></div>
 		</div>
 		<br>
 
@@ -134,6 +134,9 @@
 		</p>
 		<p>
 			The New York Times has a <%= link_to "great piece", 'http://www.nytimes.com/2013/08/15/business/energy-environment/intermittent-nature-of-green-power-is-challenge-for-utilities.html?pagewanted=2&_r=1&hp&', :target => '_blank' %> about a wind farm in Vermont that offers a window into the politics surrounding our grid and green energy.
+		</p>
+		<p>
+			The <%= link_to "Campaign for Local Power", 'http://www.indiegogo.com/projects/campaign-for-local-power?c=upworthy' %> is a movement dedicated to extricating our communities from the vice grips of electricity corporations that rely on fossil fuels.
 		</p>
 		<p>
 			Here's a blog post from Scientifid American on <%= link_to "why fracking might not be so great", 'http://www.scientificamerican.com/article.cfm?id=groundwater-contamination-may-end-the-gas-fracking-boom', :target => '_blank' %>.
