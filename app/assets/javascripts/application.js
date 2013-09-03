@@ -15,6 +15,6 @@
 //= require turbolinks
 //= require d3.v3.min
 //= require jquery-ui-1.10.3.custom.min
-//= require bootstrap.min
+//= require twitter/bootstrap
 //= require jquery.scrollto
 //= require viz

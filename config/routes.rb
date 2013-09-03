@@ -6,6 +6,9 @@ PowerVizD3::Application.routes.draw do
   # You can have the root of your site routed with "root"
   root 'viz#index'
 
+  post 'submit_scores', to: 'viz#submit_scores'
+  post 'submit_email', to: 'viz#submit_email'
+
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'
 

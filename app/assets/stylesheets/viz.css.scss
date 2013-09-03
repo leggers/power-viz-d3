@@ -15,6 +15,19 @@ div.tooltip {
   pointer-events: none;
 }
 
+div.explanation_tooltip {
+  position: absolute;
+  text-align: center;
+  width: 200px;
+  height: 175px;
+  font: 15px sans-serif;
+  background: #ddd;
+  border: solid 1px #aaa;
+  border-radius: 8px;
+  pointer-events: none;
+  cursor: crosshair;
+}
+
 .first_words {
   font-size: 20px;
 }

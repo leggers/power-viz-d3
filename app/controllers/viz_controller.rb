@@ -1,4 +1,11 @@
 class VizController < ApplicationController
+
+  GREEN = {
+    coal: -1, nat_gas: -1, nuclear: 1, hydro: 1,wind: 1, solar: 1, geo: 1, biomass: 1,
+    wood: 1, hydro_pumped: 0, pet_liquid: -1, pet_coke: -1, other_gases: 0, other: 0
+    #, other_renew: 1
+  }
+
   def index
     @state_abbrevs = [
       'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'FL', 'GA', 'ID', 'IL', 'IN', 'HI',
@@ -23,8 +30,6 @@ class VizController < ApplicationController
         end
       end
     end
-
-    p @green
 
     gon.green = @green
     gon.state_abbrevs = @state_abbrevs
@@ -70,7 +75,7 @@ class VizController < ApplicationController
     @pie_colors = {coal: "#000", pet_liquid: '#33401c', pet_coke: '#777', nat_gas: '#2c70ad',
       other_gases: '#567d8b', nuclear: '#01e512', hydro: '#2a30fb',
       wind: '#0de6f0', solar: '#dee118', wood: '#947603', geo: '#e7c130', biomass: '#3d8b54',
-      hydro_pumped: '#1c35b4', other: '#d91bdb'
+      hydro_pumped: '#1c35b4', other: '#9e2338'
     # , other_renew: '#227a47'
     }
 
@@ -80,7 +85,31 @@ class VizController < ApplicationController
   end
 
   def submit_scores
-    
+    if @keys_as_strings.nil?
+      @keys_as_strings = []
+      GREEN.keys.uniq.sort.each { |key| @keys_as_strings << key.to_s }
+    end
+    p params['green']
+    values = UserValues.create
+    values.values = params['green']
+    values.save
+    respond_to .js
+  end
+
+  def submit_email
+    p '100'
+    p gb = Gibbon::API.new("878aa3394041296e5ba209bd813df118-us7")
+    gb.throws_exceptions = false
+    p gb.lists.list
+    p params['email']
+    response = gb.list_subscribe(
+      :id => '103a359a71',
+      :email_address => params['email'],
+      :double_optin => false,
+      :send_welcome => false
+      )
+    p response
+    respond_to .js
   end
 
 end

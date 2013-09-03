@@ -32,6 +32,7 @@ rlabel = /label/i
 rbox = /box/i
 rbar = /bar/i
 rscale = /scale/i
+explanation_tooltip = undefined
 
 ###########################################
 #
@@ -61,7 +62,8 @@ $ ->
             value: weight,
             slide: (event, ui) ->
                 change_green_val(ui.handle.parentElement.id.slice(0, -7), ui.value)
-                share_opinion()
+                $('#share').show()
+                $('#share_text').hide()
             })
         $("##{type}_input").on('change', (eventObject) ->
             change_green_val(this.id.slice(0, -6), this.value)
@@ -108,10 +110,8 @@ $ ->
     $('#close').hide()
     $('#replay').on('click', states_fade_in)
     $('#compare').on('click', compare_states_mode)
-    $('#make_chart').on('click', make_chart)
-    $('#close').on('click', () ->
-        show_map(false)
-    )
+    $('#make_chart').on('click', () -> make_chart(false))
+    $('#close').on('click', () -> show_map(false))
     $('#equalizer').hide()
     $('#equalizer_toggle').on('click', toggle_sliders)
     $('#chart_controls').hide()
@@ -130,6 +130,22 @@ $ ->
             .transition().duration(2000)
                 .style('background', 'white')
     )
+
+    explanation_tooltip = d3.select('body').append('div')
+        .attr('class', 'explanation_tooltip')
+        .text('Greenness is your personal opinion about how green a source of electricity is. For example, coal releases a lot of particulate and greenhouse gasses, so it is decidedly not green. Read below for a more thorough explanantion. Click the button to set your own scores!')
+        .style('visibility', 'hidden')
+
+    d3.select('#equalizer_toggle')
+        .on('mouseover', () -> explanation_tooltip.style('visibility', 'visible') )
+        .on('mouseleave', () -> explanation_tooltip.style('visibility', 'hidden') )
+        .on('mousemove', () -> 
+            explanation_tooltip.style('top', "#{d3.event.clientY + 10}px")
+            explanation_tooltip.style('left', "#{d3.event.clientX + 10}px")
+        )
+        .on('click', () ->
+            scrollTo
+        )
 
 #######################################
 #
@@ -261,7 +277,7 @@ add_tooltip = (bar) ->
         .attr('class', 'tooltip')
         .style('opacity', 1)
         .style('left', "#{rect.x.baseVal.value + offest + rect.width.baseVal.value/2 - 47}px")
-        .style('top', "#{rect.y.baseVal.value + 350}px")
+        .style('top', "#{rect.y.baseVal.value + 490}px")
         .text("#{Math.round(bar.datum())} GW-hrs")
 
 remove_tooltips = () ->
@@ -410,13 +426,21 @@ toggle_sliders = () ->
 #
 ###########################################
 
+explain = () ->
+    explanation_tooltip.style('vizibility', 'true')
+        .style('left', "#{d3.event.clientX}px")
+        .style('top', "#{d3.event.clientY}px")
+
 share_opinion = () ->
+    $('#share').hide()
     text_loc = $('#share_text')
+    text_loc.show()
     text_loc.empty()
     suffix = ""
     for type, value of gon.green
         suffix += '"' + type + '": ' + value + ", " if value != gon.defaults[type]
-    text_loc.append("<span class='first_words'>Share your opinion:</span> electrospection.com/?green={#{suffix.slice(0, -2)}}")
+    $.post("/submit_scores?green={#{suffix.slice(0, -2)}}")
+    text_loc.append("<span class='first_words'>Share Link:</span> electrospection.com/?green={#{suffix.slice(0, -2)}}")
 
 title_string = () ->
     string = "Comparing Electricity Production of #{gon.state_names[ to_compare[0] ]}"
@@ -743,11 +767,14 @@ clicked_outside = (event) ->
 # 3) add groups for each bar (make the attr the color the bar)
 # 4) add rects to the above groups
 make_chart = (national) ->
+    $('#scale_absolute').click()
     $('#make_chart').hide()
     $('#compare').show()
-    $('#close').show()
-    setup_chart()
     if to_compare.length or national
+        $('#close').show()
+        setup_chart()
+        console.log(to_compare)
+        console.log(national)
         if over_time
             streamgraph(national)
         else
@@ -756,6 +783,9 @@ make_chart = (national) ->
     else
         chart_group.append('text')
             .style('text-anchor', 'middle')
+            .style('x', width/2)
+            .style('y', height/2)
+            .text("Select states to compare")
     $('html').on('click', clicked_outside)
 
 

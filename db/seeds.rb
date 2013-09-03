@@ -86,7 +86,7 @@ def add_to_db state, type, url
     end
 end
 
-@api_key = 'D5AF84ED3D2DB336937D8721A5AD63DA'
+@api_key = RAILS_ENV['EIA_API_KEY']
 @state_abbrevs = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'FL', 'GA',
     'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN',
     'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK',

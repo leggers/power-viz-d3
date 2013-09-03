@@ -3,12 +3,11 @@
 	<h4>How green is the electricity that powers our cell phones, street lights and electric vehicles?</h4>
 </center>
 
-
 <body>
 
 	<div id='explanation'>
 		<p>
-			<span class='first_words'>Voice your opinion</span> by clicking "Set my scores" and adjusting the sliders according to your views on various sources of electricity.
+			<span class='first_words'>Voice your opinion</span> by clicking "Set my scores" and adjusting the sliders according to your views on the environmental impacts of various sources of electricity.
 		</p>
 		<p>
 			<span class='first_words'>Click a state</span> to see its electricity generation history shown graphically.
@@ -16,16 +15,19 @@
 		<p>
 			<span class='first_words'>Compare states</span> (to see who generates more coal power, for example), by clicking the "Compare States" button, selecting the states you want to compare, and then clicking "Make Chart."
 		</p>
+		<p>
+			<span class='first_words'>Zoom in</span> if you want bigger charts.</span>
+		</p>
 	</div>
 
 	<center>
 		<div id="weights">
-			<h2>Opinionated? Set your own green-ness scores.</h2>
-			<!-- <h3 id='please_click'>Click the button to set your own "green-ness" scores for various types of power.</h3> -->
-			<button class="btn-large btn-success" type='button' id='equalizer_toggle' style="margin-bottom: 15px;">Set my scores</button>
+			<h2>Opinionated? Set your own greenness scores.</h2>
+			<!-- <h3 id='please_click'>Click the button to set your own "greenness" scores for various types of power.</h3> -->
+			<button class="btn-large btn-success" type='button' id='equalizer_toggle' style="margin-bottom: 15px;">What's "greenness?"</button>
 			<div id='equalizer'>
 				<div id='suggestion' class='first_words'>
-					Try setting hydroelectric to +10 and coal to -10!
+					Try setting hydroelectric to +10 and coal to -10 and see how the map changes!
 				</div>
 				<div class='well' style='height: 615px;'>
 				  	<% for type, score in @green %>
@@ -35,7 +37,7 @@
 							<div style="height:150px" id=<%= "#{type}_slider" %>></div>
 						</div>
 				  	<% end %>
-				  	<!-- <button type='button' class='btn btn-large btn-success' id='share'>Share my opinion</button> -->
+				  	<button type='button' class='btn btn-large btn-success' id='share'>Share my opinion</button>
 				  	<div id='share_text'></div>
 			  	</div>
 			  </div>
@@ -70,7 +72,7 @@
 
 		<div id="map_controls">
 			<button type="button" id="compare" class='btn btn-large btn-primary' style="float: left;">Compare states</button>
-			<button type="button" id="make_chart" class='btn btn-large btn-primary' style="float: left;">Make chart</button type="button">
+			<button type="button" id="make_chart" class='btn btn-large btn-success' style="float: left;">Make chart</button type="button">
 			<button type="button" id="replay" class='btn btn-large btn-warning' style="float: right;">Reset Map</button>
 			<button type='button' id='close_chart' class='btn btn-large btn-danger' style='float:right;'>Close chart</button>
 			<button id='national' class='btn btn-large btn-inverse'>See history for the entire nation</button>
@@ -81,23 +83,27 @@
 	<br>
 	</center>
 	<p>
+		<h3>Keep me updated!</h3>
+		<%= render "email_form" %>
+	</p>
+	<p>
 		<h3>What am I looking at?</h3>
 	</p>
 	<p>
 		<span class='first_words'>Electrospection</span> is an interactive map that visualizes state-by-state electricity generation data.
-		The first view represents the "green-ness" of the electricity generated in each state of the US.
+		The first view represents the "greenness" of the electricity generated in each state of the US.
 		A state is scored based on the number of megawatt-hours of each type of energy it generates.
 		Each type of power has its own score from -10 to 10 which multiplies the number of megawatt-hours generated; the total of these points evaluates to a final score.
 		If the score is positive, the state is colored green; if negative: red.
 	</p>
 	<p>
-		<span class='first_words'>Green-ness</span> is a somewhat subjective concept, as it requires evaluation of the myriad side-effects of electricity generation by a particular method.
+		<span class='first_words'>Greenness</span> is a somewhat subjective concept, as it requires evaluation of the myriad side-effects of electricity generation by a particular method.
 		It is a source of debate among scientists.
 		For example: hydroelectric power dams release practically no greenhouse gasses <i>but</i> dams can prevent migratory fish like salmon from reaching their spawning grounds <b>however</b> fish ladders can be built to allow salmon to migrate.
 		Not all dams have fish ladders and not all dams block migrating salmon, further complicating the issue.
 		My personal evaluation of the effects of hydroelectricity lead me to set the slider at +1.
 		Do some research about the individual facilities in your state and set the sliders below to your beliefs!
-		The map represents a rough concept of green-ness and values are changeable to your preference - play with the sliders below and see how the map changes.
+		The map represents a rough concept of greenness and values are changeable to your preference - play with the sliders below and see how the map changes.
 	</p>
 	<p>
 		<span class='first_words'>The data</span> were pulled from the beta API of the <%= link_to "Energy Information Agency", "http://www.eia.gov", :target => '_blank' %> (it is an incredible resource, if you know how to look). Packages used to make this were <%= link_to "d3.js", "http://www.d3js.org", :target => '_blank' %>, <%= link_to "Bootstrap", "http://www.getbootstrap.com", :target => '_blank' %>, <%= link_to "jQuery", "http://www.jquery.com", :target => '_blank' %>, <%= link_to "jQuery UI", "http://www.jqueryui.com", :target => '_blank' %> and a neat little jQuery plugin called scrollTo.
@@ -135,7 +141,7 @@
 	<h3>Other Takeaways</h3>
 		<p>
 			The availability of data is essential to understanding the world around us and making invisible structures visible.
-			That sentiment holds true in all aspects of our lives: understanding government, understanding privelege (the true buzzword of 2013) and even understanding our bodies (we have very little data on how exactly our digestive tract interacts with the food we eat, for example).
+			That sentiment holds true in all aspects of our lives: understanding government, understanding privelege (the true buzzword of 2013, srew twerking) and even understanding our bodies (we have very little data on how exactly our digestive tract interacts with the food we eat, for example).
 			The true definition of transparency is availability of data; aiding knowledge.
 			Stuff like <%= link_to 'New York City making PLUTO free', 'http://www.codeforamerica.org/2013/07/25/epic-win-for-nycs-open-data-community-pluto-is-free/', :target => '_blank' %> is awesome.
 			More stuff like that should happen.
@@ -143,7 +149,7 @@
 		<p>
 			This is not a complete picture at all!
 			A lot of guesswork went into picking the data to visualize and much data remains difficult to use.
-			Policy wonks, politicians and preachers can all agree that knowledge is power, so let's (this needs to go somewhere)
+			Policy wonks, politicians and preachers can all agree that knowledge is power, so let's (this needs to go somewhere... or does it?)
 		</p>
 	<h3>Where next?</h3>
 		<p>
@@ -159,5 +165,5 @@
 		</center>
 		Copyright 2013 Lucas Eggers
 		<br>
-		<a href="mailto:electrospection@gmail.com" class='btn btn-primary'>Get in touch</a>
+		<a href="mailto:electrospection@gmail.com" class='btn btn-primary' target="_blank">Get in touch</a>
 </body>
