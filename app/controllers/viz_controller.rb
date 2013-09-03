@@ -96,20 +96,20 @@ class VizController < ApplicationController
     respond_to .js
   end
 
-  def submit_email
-    p '100'
-    p gb = Gibbon::API.new("878aa3394041296e5ba209bd813df118-us7")
-    gb.throws_exceptions = false
-    p gb.lists.list
-    p params['email']
-    response = gb.list_subscribe(
-      :id => '103a359a71',
-      :email_address => params['email'],
-      :double_optin => false,
-      :send_welcome => false
-      )
-    p response
-    respond_to .js
-  end
+  # def submit_email
+  #   p '100'
+  #   p gb = Gibbon::API.new("878aa3394041296e5ba209bd813df118-us7")
+  #   gb.throws_exceptions = false
+  #   p gb.lists.list
+  #   p params['email']
+  #   response = gb.list_subscribe(
+  #     :id => '103a359a71',
+  #     :email_address => params['email'],
+  #     :double_optin => false,
+  #     :send_welcome => false
+  #     )
+  #   p response
+  #   respond_to .js
+  # end
 
 end

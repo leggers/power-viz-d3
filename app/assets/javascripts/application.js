@@ -16,4 +16,5 @@
 //= require d3.v3.min
 //= require jquery-ui-1.10.3.custom.min
 //= require jquery.scrollto
+//= require bootstrap.min
 //= require viz
