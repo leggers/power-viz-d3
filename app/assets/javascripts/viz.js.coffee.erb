@@ -9,6 +9,7 @@
 #
 #######################################
 
+history.navigationMode = 'compatible'
 color_scale = d3.scale.linear().domain([-10, 0,10]).range(['red', 'grey', 'green'])
 _scores = {}
 _percentages = {}
@@ -40,13 +41,18 @@ explanation_tooltip = undefined
 #
 ###########################################
 
+window.onpopstate = setup
+
 $ ->
+    setup()
+
+setup = () ->
+    $('#reload').hide()
     chart_group = d3.select("#chart_group")
     width = d3.select('svg')[0][0].width.baseVal.value
     height = d3.select('svg')[0][0].height.baseVal.value
     chart_colors = gon.pie_colors
     translations = gon.translations
-
     for abbrev in gon.state_abbrevs
         calculate_scores(abbrev)
         calculate_percentages(abbrev)
@@ -136,6 +142,7 @@ $ ->
         .attr('class', 'explanation_tooltip')
         .text('Greenness is your personal opinion about how green a source of electricity is. For example, coal releases a lot of particulate and greenhouse gasses, so it is decidedly not green. Read below for a more thorough explanantion. Click the button to set your own scores!')
         .style('visibility', 'hidden')
+        .style('top', '400px')
 
     d3.select('#equalizer_toggle')
         .on('mouseover', () -> explanation_tooltip.style('visibility', 'visible') )
@@ -270,19 +277,6 @@ show_map = (comparing) ->
     $('#replay').show()
     $('#year_selector').slideDown()
     $('#national').show()
-
-add_tooltip = (bar) ->
-    rect = bar[0][0]
-    offest = ($(window).width() - width)/2
-    tooltip = d3.select('body').append('div')
-        .attr('class', 'tooltip')
-        .style('opacity', 1)
-        .style('left', "#{rect.x.baseVal.value + offest + rect.width.baseVal.value/2 - 47}px")
-        .style('top', "#{rect.y.baseVal.value + 490}px")
-        .text("#{Math.round(bar.datum())} GW-hrs")
-
-remove_tooltips = () ->
-    d3.selectAll('.tooltip').remove()
 
 show_tooltip = () ->
     tooltip.transition()
@@ -426,6 +420,19 @@ toggle_sliders = () ->
 # Visual Setup (the placing of things)
 #
 ###########################################
+
+add_tooltip = (bar) ->
+    rect = bar[0][0]
+    offest = ($(window).width() - width)/2
+    tooltip = d3.select('body').append('div')
+        .attr('class', 'tooltip')
+        .style('opacity', 1)
+        .style('left', "#{rect.x.baseVal.value + offest + rect.width.baseVal.value/2 - 47}px")
+        .style('top', "#{rect.y.baseVal.value + 490}px")
+        .text("#{Math.round(bar.datum())} GW-hrs")
+
+remove_tooltips = () ->
+    d3.selectAll('.tooltip').remove()
 
 explain = () ->
     explanation_tooltip.style('vizibility', 'true')
