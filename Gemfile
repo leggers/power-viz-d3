@@ -54,6 +54,8 @@ gem 'gon'
 gem 'rest-client'
 gem 'json'
 
+gem 'newrelic_rpm'
+
 # gem 'bootstrap-sass'
 
 # gem "therubyracer"
