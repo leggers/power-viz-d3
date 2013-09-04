@@ -72,7 +72,7 @@ class VizController < ApplicationController
       :WV => 'West Virginia', :WY => 'Wyoming', :WA => 'Washington', :USA => "the United States of America"
     }
 
-    @pie_colors = {coal: "#000", pet_liquid: '#33401c', pet_coke: '#777', nat_gas: '#2c70ad',
+    @pie_colors = {coal: "#000", pet_liquid: '#33401c', pet_coke: '#777', nat_gas: '#e5f21f',
       other_gases: '#567d8b', nuclear: '#01e512', hydro: '#2a30fb',
       wind: '#0de6f0', solar: '#dee118', wood: '#947603', geo: '#e7c130', biomass: '#3d8b54',
       hydro_pumped: '#1c35b4', other: '#9e2338'

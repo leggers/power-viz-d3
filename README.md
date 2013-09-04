@@ -1,4 +1,4 @@
 power-viz-d3
 ============
 
-rebuild power viz from scratch using d3 visualization instead of kartograph
+Interactive visualization of electricity generation data. Check it out at www.electrospection.com

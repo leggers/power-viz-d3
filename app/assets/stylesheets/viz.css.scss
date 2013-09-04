@@ -29,7 +29,22 @@ div.explanation_tooltip {
 
 #reload {
   color: red;
-  height: 5000px;
+}
+
+.ui-slider-range {
+  background: linear-gradient(left, rgb(235,132,132) 22%, rgb(179,179,179) 50%, rgb(20,158,69) 100%);
+  background: -o-linear-gradient(left, rgb(235,132,132) 22%, rgb(179,179,179) 50%, rgb(20,158,69) 100%);
+  background: -moz-linear-gradient(left, rgb(235,132,132) 22%, rgb(179,179,179) 50%, rgb(20,158,69) 100%);
+  background: -webkit-linear-gradient(left, rgb(235,132,132) 22%, rgb(179,179,179) 50%, rgb(20,158,69) 100%);
+  background: -ms-linear-gradient(left, rgb(235,132,132) 22%, rgb(179,179,179) 50%, rgb(20,158,69) 100%);
+  background-image: -webkit-gradient(
+    linear,
+    bottom left,
+    top left,
+    color-stop(0.22, rgb(235,132,132)),
+    color-stop(0.5, rgb(179,179,179)),
+    color-stop(1, rgb(20,158,69))
+  );
 }
 
 .first_words {
@@ -57,7 +72,7 @@ text {
 }
 
 div.val_chooser {
-  height: 200px;
+  height: 75px;
   float: left;
   // border: 1px solid gray;
   // padding-left: 10px;

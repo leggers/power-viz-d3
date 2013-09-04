@@ -1,18 +1,19 @@
+<center><h1 id='reload'>Error: Please reload the page</h1></center>
+<div id='content' style='display:none;'>
 <center>
-	<h1 id='reload'>Error: Please reload the page</h1>
 	<h1>Where does your electricity come from?</h1>
 	<h4>How green is the electricity that powers your cell phone, street lights and electric vehicles?</h4>
 </center>
 
 <div id='explanation'>
 	<p>
-		<span class='first_words'>Voice your opinion</span> by clicking <%= link_to "What's \"greenness?\"", '#', id: 'eq_link' %>  and adjusting the sliders according to your views on the environmental impacts of various sources of electricity.
+		<span class='first_words'>What does greenness mean to you?</span> Adjust the sliders below according to your views on the environmental impacts of various sources of electricity.
 	</p>
 	<p>
-		<span class='first_words'>Click a state</span> to see its electricity generation history shown graphically.
+		<span class='first_words'>Click a state</span> to see its electricity generation history.
 	</p>
 	<p>
-		<span class='first_words'>Compare states</span> by clicking the "Compare States" button, selecting the states you want to compare, and then clicking "Make Chart" (to see who generates more coal power, for instance).
+		<span class='first_words'>Compare states</span> by clicking the "Compare States" button, selecting the states you want to compare and clicking "Make Chart" (to see who generates more coal power, for instance).
 	</p>
 	<p>
 		<span class='first_words'>Zoom in</span> if you want bigger charts.</span>
@@ -23,17 +24,18 @@
 	<div id="weights">
 		<h2>Opinionated? Set your own greenness scores.</h2>
 		<!-- <h3 id='please_click'>Click the button to set your own "greenness" scores for various types of power.</h3> -->
-		<button class="btn-large btn-success" type='button' id='equalizer_toggle' style="margin-bottom: 15px;">What's "greenness?"</button>
+		<button class="btn-large btn-success" type='button' id='equalizer_toggle' style="margin-bottom: 15px;">Hide sliders</button>
 		<div id='equalizer'>
 			<div id='suggestion' class='first_words'>
-				Try setting hydroelectric to +10 and coal to -10 and see how the map changes!
+				Try setting nuclear to +10 and coal to -10 and see how the map changes!
 			</div>
-			<div class='well' style='height: 615px;'>
+			<div class='well' style='height: 225px;'>
 			  	<% for type, score in @green %>
 			  		<div class="val_chooser">
-						<div style="float: left;"><%= @translations[type] %>:</div>
-						<input type="number" style="width: 40px; border: none; background: transparent;" value="<%= score %>" id=<%= "#{type}_input" %>></input>
-						<div style="height:150px" id=<%= "#{type}_slider" %>></div>
+						<div><%= @translations[type] %>:
+							<input type="number" style="width: 40px; border: none; background: transparent;" value="<%= score %>" id=<%= "#{type}_input" %>></input>
+						</div>
+						<div style="width:150px" id=<%= "#{type}_slider" %>></div>
 					</div>
 			  	<% end %>
 			  	<button type='button' class='btn btn-large btn-success' id='share'>Share my opinion</button>
@@ -45,20 +47,6 @@
 
 	<div id='map'>
 		<%= render "map" %>
-	</div>
-
-	<div id="chart_controls">
-		<br>
-		<span class='first_words'>
-			Compare either the total electricity or the percentages of the total each state generates.
-		</span>
-			<%= form_tag do %>
-				<%= radio_button_tag(:scale, "absolute", value: true) %>
-				<%= label_tag(:scale_absolute, "Absolute (total number of gigawatt-hours generated)", id: 'scale_label') %>
-				<%= radio_button_tag(:scale, "relative") %>
-				<%= label_tag(:scale_relative, "Proportional (percentage of each type of electricity)", id: 'scale_label') %>
-				<button type="button" id="close" class="btn btn-large btn-danger">Close Chart</button>
-			<% end %>
 	</div>
 	<br>
 
@@ -72,14 +60,27 @@
 	<div id="map_controls">
 		<button type="button" id="compare" class='btn btn-large btn-primary' style="float: left;">Compare states</button>
 		<button type="button" id="make_chart" class='btn btn-large btn-success' style="float: left;">Make chart</button type="button">
-		<button type="button" id="replay" class='btn btn-large btn-warning' style="float: right;">Reset Map</button>
+		<button type="button" id="replay" class='btn btn-large btn-warning' style="float: right;">Replay Animation</button>
 		<button type='button' id='close_chart' class='btn btn-large btn-danger' style='float:right;'>Close chart</button>
 		<button id='national' class='btn btn-large btn-inverse'>See history for the entire nation</button>
 		<!-- <span id="temporal_mode">See which states have gotten better or worse (changes with time)</span> -->
 		<!-- <span id="static_mode">See one point in time</span> -->
 	</div>
 
-<br>
+	<div id="chart_controls">
+		<br>
+		<span class='first_words'>
+			Compare either the total electricity or the percentages of the total each state generates.
+		</span>
+			<%= form_tag nil, :class => 'form-inline' do %>
+				<%= radio_button_tag(:scale, "absolute", value: true) %>
+				<%= label_tag(:scale_absolute, "Absolute (total number of gigawatt-hours generated)", id: 'scale_label') %>
+				<%= radio_button_tag(:scale, "relative") %>
+				<%= label_tag(:scale_relative, "Proportional (percentage of each type of electricity)", id: 'scale_label') %>
+			<% end %>
+			<button type="button" id="close" class="btn btn-large btn-danger">Close Chart</button>
+	</div>
+	<br>
 </center>
 <p>
 	<h3>Keep me updated!</h3>
@@ -90,37 +91,40 @@
 </p>
 <p>
 	<span class='first_words'>Electrospection</span> is an interactive map that visualizes state-by-state electricity generation data.
-	The first view represents the "greenness" of the electricity generated in each state of the US.
-	A state is scored based on the number of megawatt-hours of each type of energy it generates.
-	Each type of power has its own score from -10 to 10 which multiplies the number of megawatt-hours generated; the total of these points evaluates to a final score.
-	If the score is positive, the state is colored green; if negative: red.
+	The first view represents the "greenness" of the electricity generated in each state according to the sliders above.
+	Each state is scored based on the number of megawatt-hours of each type of energy it generates.
+	Each type of power is multiplied by its corresponding score above (ranging from -10 to 10) and totaled to determine a state's greennes score.
+	If the score is positive, the state is colored green, if negative: red.
 </p>
 <p>
-	<span class='first_words'>Greenness</span> is a somewhat subjective concept, as it requires evaluation of the myriad side-effects of electricity generation by a particular method.
+	<span class='first_words'>Greenness</span> is a somewhat subjective concept, as it requires evaluation of the myriad side effects of each method of electricity generation.
 	It is a source of debate among scientists.
-	For example: hydroelectric power dams release practically no greenhouse gasses <i>but</i> dams can prevent migratory fish like salmon from reaching their spawning grounds <b>however</b> fish ladders can be built to allow salmon to migrate.
+	For example, hydroelectric power dams release practically no greenhouse gasses <i>but</i> dams can prevent migratory fish like salmon from reaching their spawning grounds; <b>however</b> fish ladders can be built to allow salmon to migrate.
 	Not all dams have fish ladders and not all dams block migrating salmon, further complicating the issue.
-	My personal evaluation of the effects of hydroelectricity lead me to set the slider at +1.
-	Do some research about the individual facilities in your state and set the sliders below to your beliefs!
-	The map represents a rough concept of greenness and values are changeable to your preference - play with the sliders below and see how the map changes.
+	<!-- My personal evaluation of the effects of hydroelectricity lead me to set the slider at +1. -->
+	Do some research about the individual facilities in your state and set the sliders above to your beliefs!
+	The map represents a rough concept of greenness and values are changeable to your preference - play with the sliders above and see how the map changes.
 </p>
 <p>
 	<span class='first_words'>The data</span> were pulled from the beta API of the <%= link_to "Energy Information Agency", "http://www.eia.gov", :target => '_blank' %> (it is an incredible resource, if you know how to look). Packages used to make this were <%= link_to "d3.js", "http://www.d3js.org", :target => '_blank' %>, <%= link_to "Bootstrap", "http://www.getbootstrap.com", :target => '_blank' %>, <%= link_to "jQuery", "http://www.jquery.com", :target => '_blank' %>, <%= link_to "jQuery UI", "http://www.jqueryui.com", :target => '_blank' %> and a neat little jQuery plugin called scrollTo.
 </p>
+<p>
+	<span class='first_words'>The code</span> is available <%= link_to 'here, though I warn you it is quite ugly as it stands', 'https://github.com/leggers/power-viz-d3', :target => '_blank' %> (and I intend to refactor).
+	Fork if you dare!
+</p>
 <h3>Caveats</h3>
 	<p>
-		This map doesn't take electricity sold <i>between</i> states because that data is not readily available.
+		This map doesn't take electricity sold <i>between</i> states into account because that data is not readily available.
 		Each state's color and graphs are made from data strictly about electricity generation.
 	</p>
 	<p>
 		An oddity in the data I noticed when making the graphs were instances of negative electricity generation by certain methods, most often pumped hydroelectric.
 		That is to say, states lost electricity by using pumped hydroelectric power to light streetlights, run air conditioning units, etc.
-	</p>
-	<p>
 		Why would any state do so?
 		Because pumped hydroelectricity is the best battery our current power grid can use.
 		The way pumped hydroelectricity works is that, during off-peak hours, states use excess electricity to pump water into a reservior above a dam.
-		Then, during peak hours, states use that water to generate electricity instead of turning on more dirty coal plants, for example; the slight loss in electricity is the price of keeping our atmosphere cleaner.
+		Then, during peak hours, states use that water to generate electricity instead of turning on a less green source.
+		The slight loss in electricity is the price of keeping our atmosphere cleaner.
 		(I removed pumped hydroelectricity from the electricity history graphs becuase it was mucking things up.)
 	</p>
 <h3>Further Education</h3>
@@ -132,31 +136,34 @@
 		The Atlantic has an <%= link_to "excellent series of videos and articles", 'http://www.theatlantic.com/special-report/users-guide-energy', :target => '_blank' %> on energy (not electricity) is consumed in the US.
 	</p>
 	<p>
+		<%= link_to 'Dot Earth', 'http://dotearth.blogs.nytimes.com/', :target => '_blank' %>, a blog hosted by the New York Times, is an incredible website about all things environmental.
+	</p>
+	<p>
 		The New York Times has a <%= link_to "great piece", 'http://www.nytimes.com/2013/08/15/business/energy-environment/intermittent-nature-of-green-power-is-challenge-for-utilities.html?pagewanted=2&_r=1&hp&', :target => '_blank' %> about a wind farm in Vermont that offers a window into the politics surrounding our grid and green energy.
 	</p>
 	<p>
 		The <%= link_to "Campaign for Local Power", 'http://www.indiegogo.com/projects/campaign-for-local-power?c=upworthy' %> is a movement dedicated to extricating our communities from the vice grips of electricity corporations that rely on fossil fuels.
 	</p>
 	<p>
-		Here's a blog post from Scientifid American on <%= link_to "why fracking might not be so great", 'http://www.scientificamerican.com/article.cfm?id=groundwater-contamination-may-end-the-gas-fracking-boom', :target => '_blank' %>.
+		Here's a blog post from Scientific American on <%= link_to "why fracking might not be so great", 'http://www.scientificamerican.com/article.cfm?id=groundwater-contamination-may-end-the-gas-fracking-boom', :target => '_blank' %>.
 	</p>
 <h3>Other Takeaways</h3>
 	<p>
 		The availability of data is essential to understanding the world around us and making invisible structures visible.
-		That sentiment holds true in all aspects of our lives: understanding government, understanding privelege (the true buzzword of 2013, srew twerking) and even understanding our bodies (we have very little data on how exactly our digestive tract interacts with the food we eat, for example).
-		The true definition of transparency is availability of data; aiding knowledge.
+		That sentiment holds true in all aspects of our lives: understanding government, understanding privilege (the true buzzword of 2013) and even understanding our bodies (we have very little data on how exactly our digestive tract interacts with the food we eat, for example).
+		Data availability facilitates transparency and knowledge.
 		Stuff like <%= link_to 'New York City making PLUTO free', 'http://www.codeforamerica.org/2013/07/25/epic-win-for-nycs-open-data-community-pluto-is-free/', :target => '_blank' %> is awesome.
 		More stuff like that should happen.
 	</p>
 	<p>
 		This is not a complete picture at all!
 		A lot of guesswork went into picking the data to visualize and much data remains difficult to use.
-		Policy wonks, politicians and preachers can all agree that knowledge is power, so let's (this needs to go somewhere... or does it?)
+		Policy wonks, politicians and preachers can all agree that knowledge is power, so let's keep assembling and presenting useful data.
 	</p>
 <h3>Where next?</h3>
 	<p>
-		I would love for this to eventually be transformed into a vizualizer for all of the EIA's data (and data from other sources, too).
-		It's possible to put energy consumption data in the map, though the graphs per-state would need to be a little more complicated to properly show how energy use breaks down per-use (transportation, electricity, heating, etc.).
+		I would love for this map to eventually be transformed into a visualizer for all of the EIA's data (and data from other sources, too).
+		It's possible to put energy consumption data in the map, though the graphs would need to be a little more complicated to properly show how energy use breaks down per use (transportation, electricity, heating, etc.).
 	</p>
 <h3>What prompted this?</h3>
 	<p>
@@ -168,3 +175,4 @@
 	Copyright 2013 Lucas Eggers
 	<br>
 	<a href="mailto:electrospection@gmail.com" class='btn btn-primary' target="_blank">Get in touch</a>
+</div>

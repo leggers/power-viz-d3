@@ -48,6 +48,7 @@ $ ->
 
 setup = () ->
     $('#reload').hide()
+    $('#content').show()
     chart_group = d3.select("#chart_group")
     width = d3.select('svg')[0][0].width.baseVal.value
     height = d3.select('svg')[0][0].height.baseVal.value
@@ -64,7 +65,7 @@ setup = () ->
             max: 10,
             min: -10,
             step: .1,
-            orientation: "vertical",
+            orientation: "horizontal",
             value: weight,
             slide: (event, ui) ->
                 change_green_val(ui.handle.parentElement.id.slice(0, -7), ui.value)
@@ -118,7 +119,6 @@ setup = () ->
     $('#compare').on('click', compare_states_mode)
     $('#make_chart').on('click', () -> make_chart(false))
     $('#close').on('click', () -> show_map(false))
-    $('#equalizer').hide()
     $('#equalizer_toggle').on('click', toggle_sliders)
     $('#eq_link').on('click', toggle_sliders)
     $('#chart_controls').hide()
@@ -424,11 +424,12 @@ toggle_sliders = () ->
 add_tooltip = (bar) ->
     rect = bar[0][0]
     offest = ($(window).width() - width)/2
+    y_offset = if $('#suggestion').is(':visible') then 720 else 415
     tooltip = d3.select('body').append('div')
         .attr('class', 'tooltip')
         .style('opacity', 1)
         .style('left', "#{rect.x.baseVal.value + offest + rect.width.baseVal.value/2 - 47}px")
-        .style('top', "#{rect.y.baseVal.value + 490}px")
+        .style('top', "#{rect.y.baseVal.value + y_offset}px")
         .text("#{Math.round(bar.datum())} GW-hrs")
 
 remove_tooltips = () ->
@@ -729,6 +730,7 @@ compare_click = (id) ->
         to_compare[to_compare.length] = id
         d3.select("##{id}").datum(2)
         state_hover(id)
+        make_chart() if to_compare.length > 1
     else
         to_compare.splice(to_compare.indexOf(id), 1)
         d3.select("##{id}").datum(0)
@@ -782,8 +784,6 @@ make_chart = (national) ->
     if to_compare.length or national
         $('#close').show()
         setup_chart()
-        console.log(to_compare)
-        console.log(national)
         if over_time
             streamgraph(national)
         else

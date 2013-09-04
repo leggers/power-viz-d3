@@ -66,6 +66,7 @@ setup = function() {
   var abbrev, type, weight, _i, _len, _ref, _ref1;
 
   $('#reload').hide();
+  $('#content').show();
   chart_group = d3.select("#chart_group");
   width = d3.select('svg')[0][0].width.baseVal.value;
   height = d3.select('svg')[0][0].height.baseVal.value;
@@ -85,7 +86,7 @@ setup = function() {
       max: 10,
       min: -10,
       step: .1,
-      orientation: "vertical",
+      orientation: "horizontal",
       value: weight,
       slide: function(event, ui) {
         change_green_val(ui.handle.parentElement.id.slice(0, -7), ui.value);
@@ -150,7 +151,6 @@ setup = function() {
   $('#close').on('click', function() {
     return show_map(false);
   });
-  $('#equalizer').hide();
   $('#equalizer_toggle').on('click', toggle_sliders);
   $('#eq_link').on('click', toggle_sliders);
   $('#chart_controls').hide();
@@ -502,11 +502,12 @@ toggle_sliders = function() {
 };
 
 add_tooltip = function(bar) {
-  var offest, rect, tooltip;
+  var offest, rect, tooltip, y_offset;
 
   rect = bar[0][0];
   offest = ($(window).width() - width) / 2;
-  return tooltip = d3.select('body').append('div').attr('class', 'tooltip').style('opacity', 1).style('left', "" + (rect.x.baseVal.value + offest + rect.width.baseVal.value / 2 - 47) + "px").style('top', "" + (rect.y.baseVal.value + 490) + "px").text("" + (Math.round(bar.datum())) + " GW-hrs");
+  y_offset = $('#suggestion').is(':visible') ? 720 : 415;
+  return tooltip = d3.select('body').append('div').attr('class', 'tooltip').style('opacity', 1).style('left', "" + (rect.x.baseVal.value + offest + rect.width.baseVal.value / 2 - 47) + "px").style('top', "" + (rect.y.baseVal.value + y_offset) + "px").text("" + (Math.round(bar.datum())) + " GW-hrs");
 };
 
 remove_tooltips = function() {
@@ -827,7 +828,10 @@ compare_click = function(id) {
   if (to_compare.indexOf(id) === -1) {
     to_compare[to_compare.length] = id;
     d3.select("#" + id).datum(2);
-    return state_hover(id);
+    state_hover(id);
+    if (to_compare.length > 1) {
+      return make_chart();
+    }
   } else {
     to_compare.splice(to_compare.indexOf(id), 1);
     d3.select("#" + id).datum(0);
@@ -890,8 +894,6 @@ make_chart = function(national) {
   if (to_compare.length || national) {
     $('#close').show();
     setup_chart();
-    console.log(to_compare);
-    console.log(national);
     if (over_time) {
       streamgraph(national);
     } else {
