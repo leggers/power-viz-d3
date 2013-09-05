@@ -165,7 +165,7 @@ setup = function() {
     $.scrollTo(0, 0);
     return d3.select('#explanation').style('background', 'yellow').transition().duration(2000).style('background', 'white');
   });
-  explanation_tooltip = d3.select('body').append('div').attr('class', 'explanation_tooltip').text('Greenness is your personal opinion about how green a source of electricity is. For example, coal releases a lot of particulate and greenhouse gasses, so it is decidedly not green. Read below for a more thorough explanantion. Click the button to set your own scores!').style('visibility', 'hidden').style('top', '400px');
+  explanation_tooltip = d3.select('body').append('div').attr('class', 'explanation_tooltip').text('Greenness is your personal opinion about how green a source of electricity is.\nFor example, coal releases a lot of particulate and greenhouse gasses, so it is decidedly not green.\nRead below for a more thorough explanantion. Click the button to set your own scores!').style('visibility', 'hidden').style('top', '400px');
   return d3.select('#equalizer_toggle').on('mouseover', function() {
     return explanation_tooltip.style('visibility', 'visible');
   }).on('mouseleave', function() {
