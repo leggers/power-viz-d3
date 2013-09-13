@@ -6,6 +6,8 @@ class VizController < ApplicationController
     #, other_renew: 1
   }
 
+  @@state_data = {}
+
   def index
     @state_abbrevs = [
       'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'FL', 'GA', 'ID', 'IL', 'IN', 'HI',
@@ -34,19 +36,20 @@ class VizController < ApplicationController
     gon.green = @green
     gon.state_abbrevs = @state_abbrevs
 
-    state_data = {}
-    @state_abbrevs.each do |state|
-      state_data[state] = {}
-      GenData.where(state: state).each do |entry|
+    if @@state_data.empty?
+      @state_abbrevs.each do |state|
+        @@state_data[state] = {}
+        GenData.where(state: state).each do |entry|
           if entry.present
-              state_data[state][entry.description] = JSON.parse entry.data unless entry.description == 'other_renew'
+              @@state_data[state][entry.description] = JSON.parse entry.data unless entry.description == 'other_renew'
           else
-              state_data[state][entry.description] = "no data"
+              @@state_data[state][entry.description] = "no data"
           end
+        end
       end
     end
 
-    gon.elec_data = state_data
+    gon.elec_data = @@state_data
 
     @translations = {
       coal: "Coal", pet_liquid: "Petroleum Liquid", pet_coke: "Petroleum Coke",
