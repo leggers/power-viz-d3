@@ -141,7 +141,7 @@ setup = () ->
     explanation_tooltip = d3.select('body').append('div')
         .attr('class', 'explanation_tooltip')
         .text('''Greenness is your personal opinion about how green a source of electricity is.
-            For example, coal releases a lot of particulate and greenhouse gasses, so it is decidedly not green.
+            For example, coal releases a lot of particulate and greenhouse gases, so it is decidedly not green.
             Read below for a more thorough explanantion. Click the button to set your own scores!''')
         .style('visibility', 'hidden')
         .style('top', '400px')
@@ -449,7 +449,7 @@ share_opinion = () ->
     text_loc.empty()
     suffix = ""
     for type, value of gon.green
-        suffix += '"' + type + '": ' + value + ", " if value != gon.defaults[type]
+        suffix += '"' + type + '":' + value + "," if value != gon.defaults[type]
     $.post("/submit_scores?green={#{suffix.slice(0, -2)}}")
     link = "http://www.electrospection.com/?green={#{suffix.slice(0, -2)}}"
     text_loc.append("<span class='first_words'>Copy-paste to share:</span> <a href=\"#{link}\" target='_blank'>#{link}</a>")

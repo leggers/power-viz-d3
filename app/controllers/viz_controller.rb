@@ -53,7 +53,7 @@ class VizController < ApplicationController
 
     @translations = {
       coal: "Coal", pet_liquid: "Petroleum Liquid", pet_coke: "Petroleum Coke",
-      nat_gas: "Natural Gas", other_gases: "Other Gasses", nuclear: "Nuclear",
+      nat_gas: "Natural Gas", other_gases: "Other Gases", nuclear: "Nuclear",
       hydro: "Hydroelectric", wind: "Wind", solar: "Solar", wood: "Wood",
       geo: "Geothermal", biomass: "Biomass", hydro_pumped: "Pumped Hydro",
       other: "Other"
